@@ -1,6 +1,6 @@
 {
   "name": "@better-s3/core",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Core utilities for S3-compatible file uploads — types, validation, upload engine, and presign API client",
   "keywords": [
     "s3",
