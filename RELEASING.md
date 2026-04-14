@@ -40,7 +40,7 @@ pnpm version-packages
 ```
 
 2. Commit generated version updates.
-3. Push to `master`.
+3. Push to `main`.
 4. Existing publish workflow publishes new versions if they are not already on npm.
 
 ## How to write a good changeset
