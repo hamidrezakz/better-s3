@@ -30,8 +30,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build all packages
-        run: pnpm build
+      - name: Build packages only
+        run: pnpm turbo run build --filter="./packages/*"
 
-      - name: Type check
-        run: pnpm check-types
+      - name: Type check packages only
+        run: pnpm turbo run check-types --filter="./packages/*"
+
+  build-apps:
+    name: Build Apps & Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build apps and templates
+        run: pnpm turbo run build --filter="./apps/*" --filter="./templates/*"
+
+      - name: Type check apps and templates
+        run: pnpm turbo run check-types --filter="./apps/*" --filter="./templates/*"
