@@ -1,0 +1,46 @@
+{
+  "name": "@better-s3/core",
+  "version": "0.1.0",
+  "description": "Core utilities for S3-compatible file uploads — types, validation, upload engine, and presign API client",
+  "keywords": [
+    "s3",
+    "upload",
+    "multipart",
+    "presigned-url",
+    "file-upload"
+  ],
+  "author": "Hamidrezakz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hamidrezakz/better-s3.git",
+    "directory": "packages/better-s3-core"
+  },
+  "homepage": "https://github.com/hamidrezakz/better-s3/tree/master/packages/better-s3-core",
+  "bugs": {
+    "url": "https://github.com/hamidrezakz/better-s3/issues"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup --config tsup.config.ts && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1029.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

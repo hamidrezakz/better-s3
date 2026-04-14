@@ -1,0 +1,93 @@
+name: Publish
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+          scope: "@better-s3"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Type check
+        run: pnpm check-types
+
+      - name: Configure npm authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
+          echo "@better-s3:registry=https://registry.npmjs.org" >> ~/.npmrc
+
+      - name: Validate npm token
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not set"
+            exit 1
+          fi
+          npm whoami
+
+      - name: Publish @better-s3/core
+        run: |
+          VERSION=$(node -p "require('./packages/better-s3-core/package.json').version")
+          if npm view @better-s3/core@$VERSION version > /dev/null 2>&1; then
+            echo "core@$VERSION already published, skipping."
+          else
+            pnpm --filter @better-s3/core publish --access public --no-git-checks
+          fi
+
+      - name: Publish @better-s3/next
+        run: |
+          VERSION=$(node -p "require('./packages/better-s3-next/package.json').version")
+          if npm view @better-s3/next@$VERSION version > /dev/null 2>&1; then
+            echo "next@$VERSION already published, skipping."
+          else
+            pnpm --filter @better-s3/next publish --access public --no-git-checks
+          fi
+
+      - name: Publish @better-s3/react
+        run: |
+          VERSION=$(node -p "require('./packages/better-s3-react/package.json').version")
+          if npm view @better-s3/react@$VERSION version > /dev/null 2>&1; then
+            echo "react@$VERSION already published, skipping."
+          else
+            pnpm --filter @better-s3/react publish --access public --no-git-checks
+          fi
+
+      - name: Publish @better-s3/ui
+        run: |
+          VERSION=$(node -p "require('./packages/better-s3-ui/package.json').version")
+          if npm view @better-s3/ui@$VERSION version > /dev/null 2>&1; then
+            echo "ui@$VERSION already published, skipping."
+          else
+            pnpm --filter @better-s3/ui publish --access public --no-git-checks
+          fi

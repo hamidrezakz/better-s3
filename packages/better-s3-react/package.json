@@ -1,0 +1,54 @@
+{
+  "name": "@better-s3/react",
+  "version": "0.1.0",
+  "description": "React hooks for S3-compatible file uploads, downloads, and deletes",
+  "keywords": [
+    "s3",
+    "react",
+    "hooks",
+    "upload",
+    "download",
+    "file-upload"
+  ],
+  "author": "Hamidrezakz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hamidrezakz/better-s3.git",
+    "directory": "packages/better-s3-react"
+  },
+  "homepage": "https://github.com/hamidrezakz/better-s3/tree/master/packages/better-s3-react",
+  "bugs": {
+    "url": "https://github.com/hamidrezakz/better-s3/issues"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup --config tsup.config.ts && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-s3/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

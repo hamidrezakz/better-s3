@@ -1,0 +1,55 @@
+{
+  "name": "@better-s3/next",
+  "version": "0.1.0",
+  "description": "Next.js route handler factories for S3-compatible presigned uploads, downloads, and deletes",
+  "keywords": [
+    "s3",
+    "nextjs",
+    "route-handler",
+    "presigned-url",
+    "upload",
+    "multipart"
+  ],
+  "author": "Hamidrezakz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hamidrezakz/better-s3.git",
+    "directory": "packages/better-s3-next"
+  },
+  "homepage": "https://github.com/hamidrezakz/better-s3/tree/master/packages/better-s3-next",
+  "bugs": {
+    "url": "https://github.com/hamidrezakz/better-s3/issues"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup --config tsup.config.ts && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-s3/core": "workspace:*",
+    "@aws-sdk/s3-request-presigner": ">=3"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-s3": ">=3"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1029.0",
+    "@aws-sdk/s3-request-presigner": "^3.1029.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

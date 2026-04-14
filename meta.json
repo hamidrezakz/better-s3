@@ -1,0 +1,5 @@
+{
+  "name": "better-s3",
+  "description": "Production-ready S3 file management for React — upload, download, delete with presigned URLs",
+  "maintainedByCoreTeam": true
+}
