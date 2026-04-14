@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build & Type Check
+    name: Build & Type Check (packages)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,10 +30,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages only
+      - name: Build packages
         run: pnpm turbo run build --filter="./packages/*"
 
-      - name: Type check packages only
+      - name: Type check packages
         run: pnpm turbo run check-types --filter="./packages/*"
 
   build-apps:
@@ -42,21 +42,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for app/template changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(apps|templates)/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Setup pnpm
+        if: steps.changes.outputs.changed == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
       - name: Install dependencies
+        if: steps.changes.outputs.changed == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build apps and templates
+        if: steps.changes.outputs.changed == 'true'
         run: pnpm turbo run build --filter="./apps/*" --filter="./templates/*"
 
       - name: Type check apps and templates
+        if: steps.changes.outputs.changed == 'true'
         run: pnpm turbo run check-types --filter="./apps/*" --filter="./templates/*"

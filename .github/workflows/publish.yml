@@ -37,11 +37,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build all packages
-        run: pnpm build
+      - name: Build packages
+        run: pnpm turbo run build --filter="./packages/*"
 
-      - name: Type check
-        run: pnpm check-types
+      - name: Type check packages
+        run: pnpm turbo run check-types --filter="./packages/*"
 
       - name: Configure npm authentication
         run: |
