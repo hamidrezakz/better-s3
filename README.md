@@ -31,20 +31,20 @@ better-s3 is built in layers. Use only what you need:
 
 ## Packages
 
-| Package                                          | Description                                                                | Version                                                      |
-| ------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| [`@better-s3/core`](./packages/better-s3-core)   | Upload engine, validation, types, presign API client. Built on AWS SDK v3. | ![npm](https://img.shields.io/npm/v/@better-s3/core?label=)  |
-| [`@better-s3/next`](./packages/better-s3-next)   | Next.js App Router handlers for presigned URL generation                   | ![npm](https://img.shields.io/npm/v/@better-s3/next?label=)  |
-| [`@better-s3/react`](./packages/better-s3-react) | Headless React hooks — upload, download, delete with full state            | ![npm](https://img.shields.io/npm/v/@better-s3/react?label=) |
-| [`@better-s3/ui`](./packages/better-s3-ui)       | Pre-built shadcn/ui components (dropzone, progress, delete dialog)         | ![npm](https://img.shields.io/npm/v/@better-s3/ui?label=)    |
+| Package                                            | Description                                                                | Version                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [`@better-s3/core`](./packages/better-s3-core)     | Upload engine, validation, types, presign API client. Built on AWS SDK v3. | ![npm](https://img.shields.io/npm/v/@better-s3/core?label=)   |
+| [`@better-s3/server`](./packages/better-s3-server) | Framework-agnostic S3 handlers + adapters (Next.js, etc.)                  | ![npm](https://img.shields.io/npm/v/@better-s3/server?label=) |
+| [`@better-s3/react`](./packages/better-s3-react)   | Headless React hooks — upload, download, delete with full state            | ![npm](https://img.shields.io/npm/v/@better-s3/react?label=)  |
+| [`@better-s3/ui`](./packages/better-s3-ui)         | Pre-built shadcn/ui components (dropzone, progress, delete dialog)         | ![npm](https://img.shields.io/npm/v/@better-s3/ui?label=)     |
 
 ## Quick Start
 
 ### 1. Install
 
 ```bash
-# Server side (Next.js)
-pnpm add @better-s3/next
+# Server side
+pnpm add @better-s3/server
 
 # Client side (headless — bring your own UI)
 pnpm add @better-s3/react
@@ -59,7 +59,7 @@ pnpm add @better-s3/ui
 
 ```ts
 // app/api/s3/[...s3]/route.ts
-import { createRouteHandler } from "@better-s3/next";
+import { createRouteHandler } from "@better-s3/server/next";
 import { S3Client } from "@better-s3/core";
 
 const s3 = new S3Client({
@@ -150,8 +150,8 @@ import "@better-s3/ui/styles.css";
 @better-s3/ui ──────► @better-s3/react ──────► @better-s3/core
 (shadcn/ui)           (Headless Hooks)          (Engine + AWS SDK)
                                                       ▲
-@better-s3/next ──────────────────────────────────────┘
-(Server Handlers)
+@better-s3/server ────────────────────────────────────┘
+(Handlers + Adapters: Next.js, ...)
 ```
 
 ## Development

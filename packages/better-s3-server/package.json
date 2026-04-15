@@ -1,23 +1,24 @@
 {
-  "name": "@better-s3/next",
+  "name": "@better-s3/server",
   "version": "1.0.0",
-  "description": "Next.js route handler factories for S3-compatible presigned uploads, downloads, and deletes",
+  "description": "Framework-agnostic S3 server handlers — presigned uploads, downloads, deletes, and multipart operations",
   "keywords": [
     "s3",
-    "nextjs",
-    "route-handler",
+    "server",
     "presigned-url",
     "upload",
-    "multipart"
+    "download",
+    "multipart",
+    "framework-agnostic"
   ],
   "author": "Hamidrezakz",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/hamidrezakz/better-s3.git",
-    "directory": "packages/better-s3-next"
+    "directory": "packages/better-s3-server"
   },
-  "homepage": "https://github.com/hamidrezakz/better-s3/tree/master/packages/better-s3-next",
+  "homepage": "https://github.com/hamidrezakz/better-s3/tree/master/packages/better-s3-server",
   "bugs": {
     "url": "https://github.com/hamidrezakz/better-s3/issues"
   },
@@ -27,6 +28,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./next": {
+      "types": "./dist/adapters/next.d.ts",
+      "default": "./dist/adapters/next.js"
     }
   },
   "files": [

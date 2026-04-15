@@ -1,7 +1,7 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import type { S3HandlerConfig } from "../types";
-import { normalizeExpiresIn, withS3ErrorHandler } from "../helpers";
+import type { S3HandlerConfig } from "../../types";
+import { normalizeExpiresIn, withS3ErrorHandler } from "../../helpers";
 
 export function createDownloadHandler(config: S3HandlerConfig) {
   return withS3ErrorHandler(async (request: Request) => {

@@ -1,12 +1,12 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import type { S3HandlerConfig } from "../types";
+import type { S3HandlerConfig } from "../../types";
 import {
   parseBody,
   requireString,
   normalizeExpiresIn,
   withS3ErrorHandler,
-} from "../helpers";
+} from "../../helpers";
 
 type Payload = {
   key: string;

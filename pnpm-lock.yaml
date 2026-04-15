@@ -36,25 +36,6 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
-  packages/better-s3-next:
-    dependencies:
-      '@aws-sdk/s3-request-presigner':
-        specifier: '>=3'
-        version: 3.1029.0
-      '@better-s3/core':
-        specifier: workspace:*
-        version: link:../better-s3-core
-    devDependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.1029.0
-        version: 3.1029.0
-      tsup:
-        specifier: ^8.5.1
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.9)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
-
   packages/better-s3-react:
     dependencies:
       '@better-s3/core':
@@ -67,6 +48,25 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.2.5
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.9)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/better-s3-server:
+    dependencies:
+      '@aws-sdk/s3-request-presigner':
+        specifier: '>=3'
+        version: 3.1029.0
+      '@better-s3/core':
+        specifier: workspace:*
+        version: link:../better-s3-core
+    devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.1029.0
+        version: 3.1029.0
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.9)(typescript@5.9.3)

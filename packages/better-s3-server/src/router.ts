@@ -1,11 +1,7 @@
-import type { S3HandlerConfig } from "./types";
+import type { S3RouteHandlerConfig } from "./types";
 import { createHandlers } from "./create-handlers";
 
-export type RouteHandlerConfig = S3HandlerConfig & {
-  basePath: string;
-};
-
-export function createRouteHandler(config: RouteHandlerConfig) {
+export function createRouter(config: S3RouteHandlerConfig) {
   const handlers = createHandlers(config);
   const base = config.basePath.replace(/\/$/, "");
 
@@ -15,9 +11,9 @@ export function createRouteHandler(config: RouteHandlerConfig) {
     const method = request.method;
 
     if (method === "POST" && subpath === "presign/upload")
-      return handlers.upload(request);
+      return handlers.presign.upload(request);
     if (method === "GET" && subpath === "presign/download")
-      return handlers.download(request);
+      return handlers.presign.download(request);
     if (method === "DELETE" && subpath === "delete")
       return handlers.delete(request);
     if (method === "POST" && subpath === "presign/multipart/init")

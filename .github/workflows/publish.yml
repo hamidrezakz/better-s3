@@ -68,13 +68,13 @@ jobs:
             pnpm --filter @better-s3/core publish --access public --no-git-checks
           fi
 
-      - name: Publish @better-s3/next
+      - name: Publish @better-s3/server
         run: |
-          VERSION=$(node -p "require('./packages/better-s3-next/package.json').version")
-          if npm view @better-s3/next@$VERSION version > /dev/null 2>&1; then
-            echo "next@$VERSION already published, skipping."
+          VERSION=$(node -p "require('./packages/better-s3-server/package.json').version")
+          if npm view @better-s3/server@$VERSION version > /dev/null 2>&1; then
+            echo "server@$VERSION already published, skipping."
           else
-            pnpm --filter @better-s3/next publish --access public --no-git-checks
+            pnpm --filter @better-s3/server publish --access public --no-git-checks
           fi
 
       - name: Publish @better-s3/react

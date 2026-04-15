@@ -1,6 +1,6 @@
 import { CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
-import type { S3HandlerConfig } from "../types";
-import { parseBody, requireString, withS3ErrorHandler } from "../helpers";
+import type { S3HandlerConfig } from "../../types";
+import { parseBody, requireString, withS3ErrorHandler } from "../../helpers";
 
 type PartEntry = {
   partNumber: number;

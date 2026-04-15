@@ -3,7 +3,12 @@
   "changelog": false,
   "commit": true,
   "fixed": [
-    ["@better-s3/core", "@better-s3/next", "@better-s3/react", "@better-s3/ui"]
+    [
+      "@better-s3/core",
+      "@better-s3/server",
+      "@better-s3/react",
+      "@better-s3/ui"
+    ]
   ],
   "linked": [],
   "access": "public",
