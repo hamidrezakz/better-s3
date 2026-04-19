@@ -1,4 +1,9 @@
-import type { UploadConfig, UploadProgress, UploadResult } from "../types";
+import type {
+  UploadConfig,
+  UploadProgress,
+  UploadResult,
+  UploadRequestOptions,
+} from "../types";
 import type { PresignApi } from "@better-s3/server";
 import { DEFAULT_CONCURRENT_FILES } from "./constants";
 import { uploadFile } from "./upload-file";
@@ -28,6 +33,7 @@ export async function uploadFiles(
   config: UploadConfig = {},
   callbacks: MultiUploadCallbacks = {},
   signal?: AbortSignal,
+  getRequestOptions?: (file: File) => UploadRequestOptions,
 ): Promise<FileItem[]> {
   const results: FileItem[] = items.map((item) => ({
     ...item,
@@ -71,6 +77,7 @@ export async function uploadFiles(
             },
           },
           signal,
+          getRequestOptions?.(item.file),
         );
         item.status = "success";
         item.result = result;

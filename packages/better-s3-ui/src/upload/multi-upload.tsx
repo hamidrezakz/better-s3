@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UploadIcon } from "lucide-react";
 import { formatFileSize } from "@better-s3/react";
-import type { UseMultiUploadOptions } from "@better-s3/react";
+import type { UseMultiUploadControlsOptions } from "@better-s3/react";
 import { useMultiUploadControls } from "@better-s3/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { MultiUploadStatus } from "./multi-upload-status";
 
-export type MultiUploadProps = UseMultiUploadOptions & {
-  objectKey: (file: File) => string;
+export type MultiUploadProps = UseMultiUploadControlsOptions & {
   variant?: "button" | "dropzone";
   className?: string;
   label?: string;

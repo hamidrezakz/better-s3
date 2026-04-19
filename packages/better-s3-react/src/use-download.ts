@@ -11,6 +11,8 @@ export type UseDownloadOptions = DownloadHooks & {
    * `"fetch"`  — streams via fetch, enables in-app progress tracking
    */
   mode?: "native" | "fetch";
+  /** Target bucket (overrides server default) */
+  bucket?: string;
 };
 
 export type UseDownloadState = {
@@ -70,7 +72,10 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
     });
 
     try {
-      const { url } = await opts.presignApi.download(key, name);
+      const { url } = await opts.presignApi.download(key, {
+        fileName: name,
+        bucket: opts.bucket,
+      });
 
       if (mode === "native") {
         const anchor = document.createElement("a");

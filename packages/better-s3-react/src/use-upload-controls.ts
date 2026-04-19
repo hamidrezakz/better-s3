@@ -1,11 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { UploadPhase, UploadProgress } from "./types";
+import type {
+  UploadPhase,
+  UploadProgress,
+  UploadRequestOptions,
+} from "./types";
 import { useUpload, type UseUploadOptions } from "./use-upload";
 
 export type UseUploadControlsOptions = UseUploadOptions & {
   objectKey: string | ((file: File) => string);
+  /** Per-file request options (metadata, bucket, contentType) */
+  getUploadOptions?: (file: File) => UploadRequestOptions;
 };
 
 export type UseUploadControlsReturn = {
@@ -45,7 +51,7 @@ export type UseUploadControlsReturn = {
 export function useUploadControls(
   options: UseUploadControlsOptions,
 ): UseUploadControlsReturn {
-  const { objectKey, ...hookOptions } = options;
+  const { objectKey, getUploadOptions, ...hookOptions } = options;
   const ctx = useUpload(hookOptions);
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileInfo, setFileInfo] = useState<{
@@ -60,7 +66,7 @@ export function useUploadControls(
     const file = files?.[0];
     if (!file) return;
     setFileInfo({ name: file.name, size: file.size });
-    await ctx.upload(file, resolveKey(file));
+    await ctx.upload(file, resolveKey(file), getUploadOptions?.(file));
   };
 
   const openFilePicker = () => inputRef.current?.click();

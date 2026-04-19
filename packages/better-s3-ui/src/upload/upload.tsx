@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UploadIcon } from "lucide-react";
 import { formatFileSize } from "@better-s3/react";
-import type { UseUploadOptions } from "@better-s3/react";
+import type { UseUploadControlsOptions } from "@better-s3/react";
 import { useUploadControls } from "@better-s3/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { UploadStatus } from "./upload-status";
 
-export type UploadProps = UseUploadOptions & {
-  objectKey: string | ((file: File) => string);
+export type UploadProps = UseUploadControlsOptions & {
   variant?: "button" | "dropzone";
   className?: string;
   label?: string;

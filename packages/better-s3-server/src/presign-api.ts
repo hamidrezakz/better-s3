@@ -32,31 +32,43 @@ export type PresignApi = {
     key: string;
     contentType?: string;
     metadata?: Record<string, string>;
+    bucket?: string;
   }) => Promise<PresignResponse>;
-  confirm: (payload: { key: string }) => Promise<UploadConfirmResponse>;
-  download: (key: string, fileName?: string) => Promise<PresignResponse>;
+  confirm: (payload: {
+    key: string;
+    bucket?: string;
+  }) => Promise<UploadConfirmResponse>;
+  download: (
+    key: string,
+    options?: { fileName?: string; bucket?: string },
+  ) => Promise<PresignResponse>;
   delete: (
     key: string,
+    options?: { bucket?: string },
   ) => Promise<{ success: boolean; bucket: string; key: string }>;
   multipart: {
     init: (payload: {
       key: string;
       contentType?: string;
       metadata?: Record<string, string>;
+      bucket?: string;
     }) => Promise<MultipartInitResponse>;
     signPart: (payload: {
       key: string;
       uploadId: string;
       partNumber: number;
+      bucket?: string;
     }) => Promise<MultipartPartResponse>;
     complete: (payload: {
       key: string;
       uploadId: string;
       parts: Array<{ partNumber: number; eTag: string }>;
+      bucket?: string;
     }) => Promise<{ key: string; bucket: string; uploadId: string }>;
     abort: (payload: {
       key: string;
       uploadId: string;
+      bucket?: string;
     }) => Promise<{ aborted: boolean }>;
   };
 };
@@ -92,18 +104,21 @@ export function createPresignApi(basePath = "/api/s3"): PresignApi {
       );
     },
 
-    download(key, fileName?) {
+    download(key, options?) {
       const params = new URLSearchParams({ key });
-      if (fileName) {
-        const safe = fileName.replace(/["\\\r\n]/g, "_");
+      if (options?.fileName) {
+        const safe = options.fileName.replace(/["\\\r\n]/g, "_");
         params.set("fileName", safe);
       }
+      if (options?.bucket) params.set("bucket", options.bucket);
       return json<PresignResponse>(`${base}/presign/download?${params}`);
     },
 
-    delete(key) {
+    delete(key, options?) {
+      const params = new URLSearchParams({ key });
+      if (options?.bucket) params.set("bucket", options.bucket);
       return json<{ success: boolean; bucket: string; key: string }>(
-        `${base}/delete?key=${encodeURIComponent(key)}`,
+        `${base}/delete?${params}`,
         { method: "DELETE" },
       );
     },

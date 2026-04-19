@@ -9,6 +9,7 @@ import type {
   UploadPhase,
   UploadProgress,
   UploadResult,
+  UploadRequestOptions,
 } from "./types";
 import { uploadFile } from "./upload";
 
@@ -27,7 +28,11 @@ export type UseUploadState = {
 };
 
 export type UseUploadReturn = UseUploadState & {
-  upload: (file: File, objectKey: string) => Promise<void>;
+  upload: (
+    file: File,
+    objectKey: string,
+    requestOptions?: UploadRequestOptions,
+  ) => Promise<void>;
   cancel: () => void;
   reset: () => void;
 };
@@ -49,83 +54,91 @@ export function useUpload(options: UseUploadOptions): UseUploadReturn {
   optionsRef.current = options;
   const abortRef = useRef<AbortController | null>(null);
 
-  const upload = useCallback(async (file: File, objectKey: string) => {
-    setState({
-      ...INITIAL_STATE,
-      phase: "validating",
-      fileName: file.name,
-      fileSize: file.size,
-    });
-    const opts = optionsRef.current;
+  const upload = useCallback(
+    async (
+      file: File,
+      objectKey: string,
+      requestOptions?: UploadRequestOptions,
+    ) => {
+      setState({
+        ...INITIAL_STATE,
+        phase: "validating",
+        fileName: file.name,
+        fileSize: file.size,
+      });
+      const opts = optionsRef.current;
 
-    const validationError = validateFile(file, {
-      accept: opts.accept,
-      maxFileSize: opts.maxFileSize,
-    });
-    if (validationError) {
-      setState((s) => ({ ...s, phase: "error", error: validationError }));
-      opts.onError?.(file, new Error(validationError), "validating");
-      return;
-    }
+      const validationError = validateFile(file, {
+        accept: opts.accept,
+        maxFileSize: opts.maxFileSize,
+      });
+      if (validationError) {
+        setState((s) => ({ ...s, phase: "error", error: validationError }));
+        opts.onError?.(file, new Error(validationError), "validating");
+        return;
+      }
 
-    if (opts.beforeUpload) {
-      const allowed = await opts.beforeUpload(file);
-      if (!allowed) {
+      if (opts.beforeUpload) {
+        const allowed = await opts.beforeUpload(file);
+        if (!allowed) {
+          setState((s) => ({
+            ...s,
+            phase: "error",
+            error: "Upload blocked by beforeUpload hook",
+          }));
+          opts.onError?.(file, new Error("blocked"), "validating");
+          return;
+        }
+      }
+
+      setState((s) => ({ ...s, phase: "uploading" }));
+      opts.onUploadStart?.(file, objectKey);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const result = await uploadFile(
+          opts.presignApi,
+          file,
+          objectKey,
+          {
+            multipart: opts.multipart,
+            multipartThreshold: opts.multipartThreshold,
+            concurrentParts: opts.concurrentParts,
+          },
+          {
+            onProgress: (progress) => {
+              setState((s) => ({ ...s, progress }));
+              opts.onProgress?.(file, progress);
+            },
+          },
+          controller.signal,
+          requestOptions,
+        );
+
         setState((s) => ({
           ...s,
-          phase: "error",
-          error: "Upload blocked by beforeUpload hook",
+          phase: "success",
+          result,
+          progress: { loaded: file.size, total: file.size, percent: 100 },
         }));
-        opts.onError?.(file, new Error("blocked"), "validating");
-        return;
+        await opts.onSuccess?.(file, result);
+      } catch (err) {
+        if ((err as Error).name === "AbortError") {
+          opts.onCancel?.(file);
+          setState(INITIAL_STATE);
+          return;
+        }
+        const message = err instanceof Error ? err.message : "Upload failed";
+        setState((s) => ({ ...s, phase: "error", error: message }));
+        opts.onError?.(file, err, "uploading");
+      } finally {
+        abortRef.current = null;
       }
-    }
-
-    setState((s) => ({ ...s, phase: "uploading" }));
-    opts.onUploadStart?.(file, objectKey);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const result = await uploadFile(
-        opts.presignApi,
-        file,
-        objectKey,
-        {
-          multipart: opts.multipart,
-          multipartThreshold: opts.multipartThreshold,
-          concurrentParts: opts.concurrentParts,
-        },
-        {
-          onProgress: (progress) => {
-            setState((s) => ({ ...s, progress }));
-            opts.onProgress?.(file, progress);
-          },
-        },
-        controller.signal,
-      );
-
-      setState((s) => ({
-        ...s,
-        phase: "success",
-        result,
-        progress: { loaded: file.size, total: file.size, percent: 100 },
-      }));
-      await opts.onSuccess?.(file, result);
-    } catch (err) {
-      if ((err as Error).name === "AbortError") {
-        opts.onCancel?.(file);
-        setState(INITIAL_STATE);
-        return;
-      }
-      const message = err instanceof Error ? err.message : "Upload failed";
-      setState((s) => ({ ...s, phase: "error", error: message }));
-      opts.onError?.(file, err, "uploading");
-    } finally {
-      abortRef.current = null;
-    }
-  }, []);
+    },
+    [],
+  );
 
   const cancel = useCallback(() => {
     abortRef.current?.abort();

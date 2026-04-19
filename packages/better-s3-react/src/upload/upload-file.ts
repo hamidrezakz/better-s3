@@ -1,4 +1,9 @@
-import type { UploadConfig, UploadProgress, UploadResult } from "../types";
+import type {
+  UploadConfig,
+  UploadProgress,
+  UploadResult,
+  UploadRequestOptions,
+} from "../types";
 import type { PresignApi } from "@better-s3/server";
 import {
   DEFAULT_MULTIPART_THRESHOLD,
@@ -21,10 +26,12 @@ export async function uploadFile(
   config: UploadConfig = {},
   callbacks: UploadEngineCallbacks = {},
   signal?: AbortSignal,
+  requestOptions?: UploadRequestOptions,
 ): Promise<UploadResult> {
   const threshold = config.multipartThreshold ?? DEFAULT_MULTIPART_THRESHOLD;
   const useMultipart = config.multipart === true && file.size >= threshold;
   const concurrentParts = config.concurrentParts ?? DEFAULT_CONCURRENT_PARTS;
+  const contentType = requestOptions?.contentType ?? file.type;
 
   let eTag: string | undefined;
 
@@ -37,13 +44,16 @@ export async function uploadFile(
       concurrentParts,
       callbacks.onProgress,
       signal,
+      requestOptions,
     );
   } else {
     eTag = await withRetry(
       async () => {
         const presign = await presignApi.upload({
           key: objectKey,
-          contentType: file.type,
+          contentType,
+          metadata: requestOptions?.metadata,
+          bucket: requestOptions?.bucket,
         });
         return uploadSimple(file, presign.url, callbacks.onProgress, signal);
       },
@@ -51,7 +61,10 @@ export async function uploadFile(
       signal,
     );
 
-    await presignApi.confirm({ key: objectKey });
+    await presignApi.confirm({
+      key: objectKey,
+      bucket: requestOptions?.bucket,
+    });
   }
 
   return { key: objectKey, eTag };

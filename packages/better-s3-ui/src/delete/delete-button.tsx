@@ -31,6 +31,8 @@ type DeleteButtonProps = DeleteHooks & {
   objectKey: string;
   fileName?: string;
   fileSize?: number;
+  /** Target bucket (overrides server default) */
+  bucket?: string;
   label?: string;
   className?: string;
   disabled?: boolean;
@@ -48,6 +50,7 @@ export function DeleteButton({
   objectKey,
   fileName,
   fileSize,
+  bucket,
   label,
   className,
   disabled,
@@ -65,6 +68,7 @@ export function DeleteButton({
 
   const del = useDelete({
     presignApi,
+    bucket,
     beforeDelete,
     onDeleteStart,
     onSuccess: (key) => {

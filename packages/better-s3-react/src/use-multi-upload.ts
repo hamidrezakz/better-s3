@@ -7,6 +7,7 @@ import type {
   UploadConfig,
   UploadProgress,
   UploadResult,
+  UploadRequestOptions,
   MultiUploadPhase,
   MultiUploadFileState,
   MultiUploadHooks,
@@ -16,6 +17,10 @@ import { uploadFiles } from "./upload";
 export type UseMultiUploadOptions = UploadConfig &
   MultiUploadHooks & {
     presignApi: PresignApi;
+    /** Static request options applied to all files */
+    uploadOptions?: UploadRequestOptions;
+    /** Per-file request options (overrides uploadOptions) */
+    getUploadOptions?: (file: File) => UploadRequestOptions;
   };
 
 export type UseMultiUploadState = {
@@ -191,6 +196,11 @@ export function useMultiUpload(
             },
           },
           controller.signal,
+          (file) => {
+            const perFile = opts.getUploadOptions?.(file);
+            if (!opts.uploadOptions) return perFile ?? {};
+            return { ...opts.uploadOptions, ...perFile };
+          },
         );
 
         const hasErrors = results.some((r) => r.status === "error");

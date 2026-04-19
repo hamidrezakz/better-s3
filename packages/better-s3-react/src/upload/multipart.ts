@@ -1,4 +1,4 @@
-import type { UploadProgress } from "../types";
+import type { UploadProgress, UploadRequestOptions } from "../types";
 import type { PresignApi } from "@better-s3/server";
 import { MAX_RETRIES } from "./constants";
 import { withRetry } from "./retry";
@@ -12,10 +12,14 @@ export async function uploadMultipart(
   concurrentParts: number,
   onProgress?: (progress: UploadProgress) => void,
   signal?: AbortSignal,
+  requestOptions?: UploadRequestOptions,
 ): Promise<void> {
+  const contentType = requestOptions?.contentType ?? file.type;
   const { uploadId, key } = await presignApi.multipart.init({
     key: objectKey,
-    contentType: file.type,
+    contentType,
+    metadata: requestOptions?.metadata,
+    bucket: requestOptions?.bucket,
   });
 
   const totalParts = Math.ceil(file.size / partSize);
@@ -61,6 +65,7 @@ export async function uploadMultipart(
                 key,
                 uploadId,
                 partNumber,
+                bucket: requestOptions?.bucket,
               });
 
               partProgress[i].bytes = 0;
@@ -88,10 +93,17 @@ export async function uploadMultipart(
 
     parts.sort((a, b) => a.partNumber - b.partNumber);
 
-    await presignApi.multipart.complete({ key, uploadId, parts });
+    await presignApi.multipart.complete({
+      key,
+      uploadId,
+      parts,
+      bucket: requestOptions?.bucket,
+    });
     onProgress?.({ loaded: file.size, total: file.size, percent: 100 });
   } catch (err) {
-    presignApi.multipart.abort({ key, uploadId }).catch(() => {});
+    presignApi.multipart
+      .abort({ key, uploadId, bucket: requestOptions?.bucket })
+      .catch(() => {});
     throw err;
   }
 }

@@ -6,6 +6,8 @@ import type { DeletePhase, DeleteHooks } from "./types";
 
 export type UseDeleteOptions = DeleteHooks & {
   presignApi: PresignApi;
+  /** Target bucket (overrides server default) */
+  bucket?: string;
 };
 
 export type UseDeleteState = {
@@ -58,7 +60,7 @@ export function useDelete(options: UseDeleteOptions): UseDeleteReturn {
     opts.onDeleteStart?.(pendingKey);
 
     try {
-      await opts.presignApi.delete(pendingKey);
+      await opts.presignApi.delete(pendingKey, { bucket: opts.bucket });
 
       setState({ phase: "success", error: null });
       await opts.onSuccess?.(pendingKey);

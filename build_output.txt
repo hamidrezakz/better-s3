@@ -1,0 +1,72 @@
+﻿
+> better-s3@ build C:\GitHub\better-s3
+> turbo run build
+
+pnpm : ΓÇó turbo 2.9.6
+At line:1 char:1
++ pnpm build 2>&1 | Out-File -FilePath build_output.txt -Encoding utf8; ...
++ ~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ΓÇó turbo 2.9.6:String) [], Remot 
+   eException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+   ΓÇó Packages in scope: @better-s3/react, @better-s3/server, @better-s3/ui
+   ΓÇó Running build in 3 packages
+   ΓÇó Remote caching disabled
+
+@better-s3/server:build: cache hit, replaying logs c62940c696eb9736
+@better-s3/server:build: [6n[?9001h[?1004h[m]0;C:\Windows\system32\cmd.exe[?25h[?25l
+@better-s3/server:build: > @better-s3/server@1.0.0 build C:\GitHub\better-s3\packages\better-s3-server
+@better-s3/server:build: > tsup --config tsup.config.ts && tsc --emitDeclarationOnly[5;1H[?25h[34mCLI [mBuilding entry: src/index.ts, src/adapters/next.ts
+@better-s3/server:build: [34mCLI [mUsing tsconfig: tsconfig.json[34m
+@better-s3/server:build: CLI [mtsup v8.5.1[34m
+@better-s3/server:build: CLI [mUsing tsup config: C:\GitHub\better-s3\packages\better-s3-server\tsup.config.ts[34m
+@better-s3/server:build: CLI [mTarget: esnext
+@better-s3/server:build: [34mCLI [mCleaning output folder[K
+@better-s3/server:build: [34mESM [mBuild start
+@better-s3/server:build: [32mESM [m[1mdist\adapters\next.js     [32m[22m7.24 KB
+@better-s3/server:build: [m
+@better-s3/server:build: [32mESM [m[1mdist\index.js             [32m[22m8.97 KB
+@better-s3/server:build: [m
+@better-s3/server:build: [32mESM [m[1mdist\adapters\next.js.map [32m[22m33.25 KB[K
+@better-s3/server:build: [m
+@better-s3/server:build: [32mESM [m[1mdist\index.js.map         [32m[22m42.04 KB[K
+@better-s3/server:build: [m
+@better-s3/server:build: [32mESM [mΓÜí∩╕Å Build success in 87ms[K
+@better-s3/server:build: [?9001l[?1004l
+@better-s3/react:build: cache hit, replaying logs b6f2f0e7f1f972f6
+@better-s3/react:build: [6n[?9001h[?1004h[m]0;C:\Windows\system32\cmd.exe[?25h
+@better-s3/react:build: > @better-s3/react@1.0.0 build C:\GitHub\better-s3\packages\better-s3-react
+@better-s3/react:build: > tsup --config tsup.config.ts && tsc --emitDeclarationOnly[6;1H[34mCLI [mBuilding entry: src/index.ts
+@better-s3/react:build: [34mCLI [mUsing tsconfig: tsconfig.json[34m
+@better-s3/react:build: CLI [mtsup v8.5.1[34m
+@better-s3/react:build: CLI [mUsing tsup config: C:\GitHub\better-s3\packages\better-s3-react\tsup.config.ts[34m
+@better-s3/react:build: CLI [mTarget: esnext[34m
+@better-s3/react:build: CLI [mCleaning output folder[34m
+@better-s3/react:build: ESM [mBuild start
+@better-s3/react:build: dist/index.js (1:0): Module level directives cause errors when bundled, "use client" in "dist/index.js" was ignored.
+@better-s3/react:build: [32mESM [m[1mdist\index.js     [32m[22m12.79 KB
+@better-s3/react:build: [m[32mESM [m[1mdist\index.js.map [32m[22m66.44 KB
+@better-s3/react:build: ESM [mΓÜí∩╕Å Build success in 91ms
+@better-s3/react:build: [?9001l[?1004l
+@better-s3/ui:build: cache hit, replaying logs 7ece7eac872b9890
+@better-s3/ui:build: [6n[?9001h[?1004h[m]0;C:\Windows\system32\cmd.exe[?25h[?25l
+@better-s3/ui:build: > @better-s3/ui@1.0.0 build C:\GitHub\better-s3\packages\better-s3-ui
+@better-s3/ui:build: > tsup --config tsup.config.ts && tsc --emitDeclarationOnly && tsc-alias[7;1H[?25h[34mCLI [mBuilding entry: src/index.ts
+@better-s3/ui:build: [34mCLI [mUsing tsconfig: tsconfig.json[34m
+@better-s3/ui:build: CLI [mtsup v8.5.1[34m
+@better-s3/ui:build: CLI [mUsing tsup config: C:\GitHub\better-s3\packages\better-s3-ui\tsup.config.ts[34m
+@better-s3/ui:build: CLI [mTarget: esnext[34m
+@better-s3/ui:build: CLI [mCleaning output folder[34m
+@better-s3/ui:build: ESM [mBuild start
+@better-s3/ui:build: dist/index.js (1:0): Module level directives cause errors when bundled, "use client" in "dist/index.js" was ignored.
+@better-s3/ui:build: [32mESM [m[1mdist\index.js     [32m[22m21.26 KB
+@better-s3/ui:build: [m[32mESM [m[1mdist\index.js.map [32m[22m68.79 KB
+@better-s3/ui:build: ESM [mΓÜí∩╕Å Build success in 87ms
+@better-s3/ui:build: [?9001l[?1004l
+
+ Tasks:    3 successful, 3 total
+Cached:    3 cached, 3 total
+  Time:    28ms >>> FULL TURBO
+

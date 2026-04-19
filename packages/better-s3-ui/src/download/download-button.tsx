@@ -19,6 +19,8 @@ type DownloadButtonProps = DownloadHooks & {
   objectKey: string;
   fileName?: string;
   fileSize?: number;
+  /** Target bucket (overrides server default) */
+  bucket?: string;
   label?: string;
   className?: string;
   fillClassName?: string;
@@ -40,6 +42,7 @@ export function DownloadButton({
   objectKey,
   fileName,
   fileSize,
+  bucket,
   label,
   className,
   fillClassName,
@@ -60,6 +63,7 @@ export function DownloadButton({
   const dl = useDownload({
     presignApi,
     mode,
+    bucket,
     beforeDownload,
     onDownloadStart,
     onProgress,

@@ -19,6 +19,15 @@ export type UploadPhase =
   | "success"
   | "error";
 
+export type UploadRequestOptions = {
+  /** Custom S3 object metadata (x-amz-meta-*) */
+  metadata?: Record<string, string>;
+  /** Target bucket (overrides server default) */
+  bucket?: string;
+  /** Override auto-detected content type */
+  contentType?: string;
+};
+
 export type UploadHooks = {
   beforeUpload?: (file: File) => Promise<boolean> | boolean;
   onUploadStart?: (file: File, key: string) => void;
