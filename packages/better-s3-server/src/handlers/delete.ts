@@ -1,6 +1,6 @@
 import { DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import type { S3HandlerConfig } from "../types";
-import { withS3ErrorHandler } from "../helpers";
+import { runHook, withS3ErrorHandler } from "../helpers";
 
 export function createDeleteHandler(config: S3HandlerConfig) {
   return withS3ErrorHandler(async (request: Request) => {
@@ -15,6 +15,13 @@ export function createDeleteHandler(config: S3HandlerConfig) {
 
     const bucket = searchParams.get("bucket")?.trim() || config.defaultBucket;
 
+    const guardResult = await runHook(config.hooks?.delete?.guard, {
+      request,
+      key,
+      bucket,
+    });
+    if (guardResult) return guardResult;
+
     try {
       await config.s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
     } catch {
@@ -25,6 +32,8 @@ export function createDeleteHandler(config: S3HandlerConfig) {
     }
 
     await config.s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+
+    await config.hooks?.delete?.onSuccess?.({ request, key, bucket });
 
     return Response.json({ success: true, bucket, key });
   });

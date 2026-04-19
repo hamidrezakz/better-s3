@@ -5,6 +5,7 @@ import {
   parseBody,
   requireString,
   normalizeExpiresIn,
+  runHook,
   withS3ErrorHandler,
 } from "../../helpers";
 
@@ -32,6 +33,15 @@ export function createUploadHandler(config: S3HandlerConfig) {
     const bucket = body.bucket?.trim() || config.defaultBucket;
     const expiresIn = normalizeExpiresIn(body.expiresIn);
 
+    const guardResult = await runHook(config.hooks?.upload?.guard, {
+      request,
+      key,
+      bucket,
+      contentType: body.contentType,
+      metadata: body.metadata,
+    });
+    if (guardResult) return guardResult;
+
     const url = await getSignedUrl(
       config.s3,
       new PutObjectCommand({
@@ -42,6 +52,16 @@ export function createUploadHandler(config: S3HandlerConfig) {
       }),
       { expiresIn },
     );
+
+    await config.hooks?.upload?.onSuccess?.({
+      request,
+      key,
+      bucket,
+      contentType: body.contentType,
+      metadata: body.metadata,
+      url,
+      expiresIn,
+    });
 
     return Response.json({ bucket, key, url, expiresIn });
   });

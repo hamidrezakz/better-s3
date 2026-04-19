@@ -1,5 +1,6 @@
 import type { S3HandlerConfig, S3Handlers } from "./types";
 import { createUploadHandler } from "./handlers/presign/upload";
+import { createConfirmHandler } from "./handlers/presign/confirm";
 import { createDownloadHandler } from "./handlers/presign/download";
 import { createDeleteHandler } from "./handlers/delete";
 import { createMultipartInitHandler } from "./handlers/multipart/init";
@@ -11,6 +12,7 @@ export function createHandlers(config: S3HandlerConfig): S3Handlers {
   return {
     presign: {
       upload: createUploadHandler(config),
+      confirm: createConfirmHandler(config),
       download: createDownloadHandler(config),
     },
     multipart: {

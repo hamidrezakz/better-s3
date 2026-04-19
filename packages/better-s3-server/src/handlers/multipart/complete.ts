@@ -1,6 +1,11 @@
 import { CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
 import type { S3HandlerConfig } from "../../types";
-import { parseBody, requireString, withS3ErrorHandler } from "../../helpers";
+import {
+  parseBody,
+  requireString,
+  runHook,
+  withS3ErrorHandler,
+} from "../../helpers";
 
 type PartEntry = {
   partNumber: number;
@@ -47,6 +52,13 @@ export function createMultipartCompleteHandler(config: S3HandlerConfig) {
 
     const bucket = body.bucket?.trim() || config.defaultBucket;
 
+    const guardResult = await runHook(config.hooks?.multipart?.guard, {
+      request,
+      key,
+      bucket,
+    });
+    if (guardResult) return guardResult;
+
     const { Location, ETag } = await config.s3.send(
       new CompleteMultipartUploadCommand({
         Bucket: bucket,
@@ -55,6 +67,13 @@ export function createMultipartCompleteHandler(config: S3HandlerConfig) {
         MultipartUpload: { Parts: parts },
       }),
     );
+
+    await config.hooks?.multipart?.onComplete?.({
+      request,
+      key,
+      bucket,
+      uploadId,
+    });
 
     return Response.json({
       bucket,

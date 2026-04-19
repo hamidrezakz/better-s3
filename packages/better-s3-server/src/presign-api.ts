@@ -19,12 +19,21 @@ export type MultipartPartResponse = {
   expiresIn: number;
 };
 
+export type UploadConfirmResponse = {
+  key: string;
+  bucket: string;
+  contentType?: string;
+  contentLength: number;
+  eTag?: string;
+};
+
 export type PresignApi = {
   upload: (payload: {
     key: string;
     contentType?: string;
     metadata?: Record<string, string>;
   }) => Promise<PresignResponse>;
+  confirm: (payload: { key: string }) => Promise<UploadConfirmResponse>;
   download: (key: string, fileName?: string) => Promise<PresignResponse>;
   delete: (
     key: string,
@@ -74,6 +83,13 @@ export function createPresignApi(basePath = "/api/s3"): PresignApi {
   return {
     upload(payload) {
       return post<PresignResponse>(`${base}/presign/upload`, payload);
+    },
+
+    confirm(payload) {
+      return post<UploadConfirmResponse>(
+        `${base}/presign/upload/confirm`,
+        payload,
+      );
     },
 
     download(key, fileName?) {

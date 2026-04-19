@@ -1,6 +1,11 @@
 import { AbortMultipartUploadCommand } from "@aws-sdk/client-s3";
 import type { S3HandlerConfig } from "../../types";
-import { parseBody, requireString, withS3ErrorHandler } from "../../helpers";
+import {
+  parseBody,
+  requireString,
+  runHook,
+  withS3ErrorHandler,
+} from "../../helpers";
 
 type Payload = {
   key: string;
@@ -26,6 +31,13 @@ export function createMultipartAbortHandler(config: S3HandlerConfig) {
 
     const bucket = body.bucket?.trim() || config.defaultBucket;
 
+    const guardResult = await runHook(config.hooks?.multipart?.guard, {
+      request,
+      key,
+      bucket,
+    });
+    if (guardResult) return guardResult;
+
     await config.s3.send(
       new AbortMultipartUploadCommand({
         Bucket: bucket,
@@ -33,6 +45,13 @@ export function createMultipartAbortHandler(config: S3HandlerConfig) {
         UploadId: uploadId,
       }),
     );
+
+    await config.hooks?.multipart?.onAbort?.({
+      request,
+      key,
+      bucket,
+      uploadId,
+    });
 
     return Response.json({ bucket, key, uploadId, aborted: true });
   });

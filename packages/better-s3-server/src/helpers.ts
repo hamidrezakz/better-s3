@@ -36,3 +36,25 @@ export function withS3ErrorHandler(
     }
   };
 }
+
+/**
+ * Run a server hook. Returns a Response if the hook rejects (throws),
+ * or `null` if the hook passes (or is undefined).
+ */
+export async function runHook<T>(
+  hook: ((context: T) => Promise<void> | void) | undefined,
+  context: T,
+): Promise<Response | null> {
+  if (!hook) return null;
+  try {
+    await hook(context);
+    return null;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Forbidden";
+    const status =
+      typeof (err as Record<string, unknown>)?.status === "number"
+        ? ((err as Record<string, unknown>).status as number)
+        : 403;
+    return Response.json({ message }, { status });
+  }
+}

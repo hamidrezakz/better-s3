@@ -50,6 +50,8 @@ export async function uploadFile(
       MAX_RETRIES,
       signal,
     );
+
+    await presignApi.confirm({ key: objectKey });
   }
 
   return { key: objectKey, eTag };

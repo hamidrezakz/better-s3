@@ -2,6 +2,7 @@
 export { createHandlers } from "./create-handlers";
 export { createRouter } from "./router";
 export { createUploadHandler } from "./handlers/presign/upload";
+export { createConfirmHandler } from "./handlers/presign/confirm";
 export { createDownloadHandler } from "./handlers/presign/download";
 export { createDeleteHandler } from "./handlers/delete";
 export { createMultipartInitHandler } from "./handlers/multipart/init";
@@ -16,6 +17,7 @@ export {
   type PresignResponse,
   type MultipartInitResponse,
   type MultipartPartResponse,
+  type UploadConfirmResponse,
 } from "./presign-api";
 
 // Validation
@@ -27,6 +29,17 @@ export type {
   S3RouteHandlerConfig,
   S3Handler,
   S3Handlers,
+  S3ServerHooks,
+  HookContext,
+  UploadHookContext,
+  UploadSuccessContext,
+  UploadCompleteContext,
+  DownloadHookContext,
+  DownloadSuccessContext,
+  DeleteHookContext,
+  MultipartHookContext,
+  MultipartInitSuccessContext,
+  MultipartCompleteSuccessContext,
 } from "./types";
 
 // Helpers
@@ -35,4 +48,5 @@ export {
   requireString,
   normalizeExpiresIn,
   withS3ErrorHandler,
+  runHook,
 } from "./helpers";

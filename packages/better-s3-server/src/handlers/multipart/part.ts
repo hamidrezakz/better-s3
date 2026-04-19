@@ -5,6 +5,7 @@ import {
   parseBody,
   requireString,
   normalizeExpiresIn,
+  runHook,
   withS3ErrorHandler,
 } from "../../helpers";
 
@@ -42,6 +43,13 @@ export function createMultipartPartHandler(config: S3HandlerConfig) {
 
     const bucket = body.bucket?.trim() || config.defaultBucket;
     const expiresIn = normalizeExpiresIn(body.expiresIn);
+
+    const guardResult = await runHook(config.hooks?.multipart?.guard, {
+      request,
+      key,
+      bucket,
+    });
+    if (guardResult) return guardResult;
 
     const presignedUrl = await getSignedUrl(
       config.s3,

@@ -1,4 +1,4 @@
-import { CreateMultipartUploadCommand } from "@aws-sdk/client-s3";
+import { HeadObjectCommand } from "@aws-sdk/client-s3";
 import type { S3HandlerConfig } from "../../types";
 import {
   parseBody,
@@ -10,11 +10,9 @@ import {
 type Payload = {
   key: string;
   bucket?: string;
-  contentType?: string;
-  metadata?: Record<string, string>;
 };
 
-export function createMultipartInitHandler(config: S3HandlerConfig) {
+export function createConfirmHandler(config: S3HandlerConfig) {
   return withS3ErrorHandler(async (request: Request) => {
     const body = await parseBody<Payload>(request);
     if (!body) {
@@ -29,31 +27,35 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
 
     const bucket = body.bucket?.trim() || config.defaultBucket;
 
-    const guardResult = await runHook(config.hooks?.multipart?.guard, {
+    const guardResult = await runHook(config.hooks?.upload?.guard, {
       request,
       key,
       bucket,
     });
     if (guardResult) return guardResult;
 
-    const { UploadId } = await config.s3.send(
-      new CreateMultipartUploadCommand({
-        Bucket: bucket,
-        Key: key,
-        ContentType: body.contentType,
-        Metadata: body.metadata,
-      }),
+    const head = await config.s3.send(
+      new HeadObjectCommand({ Bucket: bucket, Key: key }),
     );
 
-    await config.hooks?.multipart?.onInit?.({
+    const context = {
       request,
       key,
       bucket,
-      uploadId: UploadId!,
-      contentType: body.contentType,
-      metadata: body.metadata,
-    });
+      contentType: head.ContentType,
+      contentLength: head.ContentLength ?? 0,
+      eTag: head.ETag?.replace(/"/g, ""),
+      metadata: head.Metadata,
+    };
 
-    return Response.json({ bucket, key, uploadId: UploadId }, { status: 201 });
+    await config.hooks?.upload?.onComplete?.(context);
+
+    return Response.json({
+      key,
+      bucket,
+      contentType: context.contentType,
+      contentLength: context.contentLength,
+      eTag: context.eTag,
+    });
   });
 }
