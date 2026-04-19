@@ -1,8 +1,8 @@
 "use client";
 
 import { XIcon, CheckCircleIcon, AlertCircleIcon } from "lucide-react";
-import { formatFileSize } from "@better-s3/core";
-import type { UploadPhase, UploadProgress } from "@better-s3/core";
+import { formatFileSize } from "@better-s3/react";
+import type { UploadPhase, UploadProgress } from "@better-s3/react";
 import { Button } from "@/components/ui/button";
 import { CircleProgress } from "@/components/ui/circle-progress";
 

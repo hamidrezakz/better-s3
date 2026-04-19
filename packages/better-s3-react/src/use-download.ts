@@ -1,12 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type {
-  PresignApi,
-  DownloadPhase,
-  DownloadProgress,
-  DownloadHooks,
-} from "@better-s3/core";
+import type { PresignApi } from "@better-s3/server";
+import type { DownloadPhase, DownloadProgress, DownloadHooks } from "./types";
 
 export type UseDownloadOptions = DownloadHooks & {
   presignApi: PresignApi;

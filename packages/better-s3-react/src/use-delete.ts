@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { PresignApi, DeletePhase, DeleteHooks } from "@better-s3/core";
+import type { PresignApi } from "@better-s3/server";
+import type { DeletePhase, DeleteHooks } from "./types";
 
 export type UseDeleteOptions = DeleteHooks & {
   presignApi: PresignApi;

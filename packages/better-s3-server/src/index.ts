@@ -9,6 +9,18 @@ export { createMultipartPartHandler } from "./handlers/multipart/part";
 export { createMultipartCompleteHandler } from "./handlers/multipart/complete";
 export { createMultipartAbortHandler } from "./handlers/multipart/abort";
 
+// Presign API client
+export {
+  createPresignApi,
+  type PresignApi,
+  type PresignResponse,
+  type MultipartInitResponse,
+  type MultipartPartResponse,
+} from "./presign-api";
+
+// Validation
+export { validateFile } from "./validate";
+
 // Types
 export type {
   S3HandlerConfig,

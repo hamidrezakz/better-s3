@@ -3,8 +3,8 @@
 import { Trash2Icon, LoaderIcon, AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { formatFileSize } from "@better-s3/core";
-import type { PresignApi, DeleteHooks } from "@better-s3/core";
+import { formatFileSize } from "@better-s3/react";
+import type { PresignApi, DeleteHooks } from "@better-s3/react";
 import { useDelete } from "@better-s3/react";
 import { Button } from "@/components/ui/button";
 import {

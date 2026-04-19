@@ -1,5 +1,5 @@
 import type { UploadConfig, UploadProgress, UploadResult } from "../types";
-import type { PresignApi } from "../presign-api";
+import type { PresignApi } from "@better-s3/server";
 import { DEFAULT_CONCURRENT_FILES } from "./constants";
 import { uploadFile } from "./upload-file";
 

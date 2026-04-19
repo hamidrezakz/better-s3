@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { UploadPhase, UploadProgress } from "@better-s3/core";
+import type { UploadPhase, UploadProgress } from "./types";
 import { useUpload, type UseUploadOptions } from "./use-upload";
 
 export type UseUploadControlsOptions = UseUploadOptions & {

@@ -42,8 +42,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/s3-request-presigner": "^3.1032.0",
-    "@better-s3/core": "workspace:*"
+    "@aws-sdk/s3-request-presigner": "^3.1032.0"
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": ">=3"

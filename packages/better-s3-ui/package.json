@@ -40,7 +40,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@better-s3/core": "workspace:*",
     "@better-s3/react": "workspace:*"
   },
   "peerDependencies": {

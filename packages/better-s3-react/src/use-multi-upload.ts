@@ -1,16 +1,17 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import type { PresignApi } from "@better-s3/server";
+import { validateFile } from "@better-s3/server";
 import type {
-  PresignApi,
   UploadConfig,
   UploadProgress,
   UploadResult,
   MultiUploadPhase,
   MultiUploadFileState,
   MultiUploadHooks,
-} from "@better-s3/core";
-import { uploadFiles, validateFile } from "@better-s3/core";
+} from "./types";
+import { uploadFiles } from "./upload";
 
 export type UseMultiUploadOptions = UploadConfig &
   MultiUploadHooks & {

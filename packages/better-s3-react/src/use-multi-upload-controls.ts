@@ -5,7 +5,7 @@ import type {
   UploadProgress,
   MultiUploadPhase,
   MultiUploadFileState,
-} from "@better-s3/core";
+} from "./types";
 import { useMultiUpload, type UseMultiUploadOptions } from "./use-multi-upload";
 
 export type UseMultiUploadControlsOptions = UseMultiUploadOptions & {

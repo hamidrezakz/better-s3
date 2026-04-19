@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UploadIcon } from "lucide-react";
-import { formatFileSize } from "@better-s3/core";
+import { formatFileSize } from "@better-s3/react";
 import type { UseUploadOptions } from "@better-s3/react";
 import { useUploadControls } from "@better-s3/react";
 import { cn } from "@/lib/utils";
