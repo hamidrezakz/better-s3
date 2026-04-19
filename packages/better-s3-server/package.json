@@ -42,17 +42,17 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@better-s3/core": "workspace:*",
-    "@aws-sdk/s3-request-presigner": ">=3"
+    "@aws-sdk/s3-request-presigner": "^3.1032.0",
+    "@better-s3/core": "workspace:*"
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": ">=3"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.1029.0",
+    "@aws-sdk/client-s3": "^3.1032.0",
     "@aws-sdk/s3-request-presigner": "^3.1029.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.8.3"
+    "typescript": "^6.0.3"
   },
   "publishConfig": {
     "access": "public"
