@@ -18,13 +18,13 @@ export {
   type MultipartInitResponse,
   type MultipartPartResponse,
   type UploadConfirmResponse,
-} from "./presign-api";
+} from "./api";
 
 // Backward-compat aliases
 export {
   createS3Api as createPresignApi,
   type S3Api as PresignApi,
-} from "./presign-api";
+} from "./api";
 
 // Validation
 export { validateFile } from "./validate";
