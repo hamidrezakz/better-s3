@@ -33,6 +33,7 @@ export type S3Api = {
     contentType?: string;
     metadata?: Record<string, string>;
     bucket?: string;
+    acl?: "private" | "public-read";
   }) => Promise<PresignResponse>;
   confirm: (payload: {
     key: string;
@@ -52,6 +53,7 @@ export type S3Api = {
       contentType?: string;
       metadata?: Record<string, string>;
       bucket?: string;
+      acl?: "private" | "public-read";
     }) => Promise<MultipartInitResponse>;
     signPart: (payload: {
       key: string;

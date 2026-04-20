@@ -11,6 +11,7 @@ export type UploadHookContext = HookContext & {
   bucket: string;
   contentType?: string;
   metadata?: Record<string, string>;
+  acl?: "private" | "public-read";
 };
 
 export type UploadSuccessContext = UploadHookContext & {
@@ -52,6 +53,7 @@ export type MultipartInitSuccessContext = MultipartHookContext & {
   uploadId: string;
   contentType?: string;
   metadata?: Record<string, string>;
+  acl?: "private" | "public-read";
 };
 
 export type MultipartCompleteSuccessContext = MultipartHookContext & {

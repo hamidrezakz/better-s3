@@ -12,6 +12,7 @@ type Payload = {
   bucket?: string;
   contentType?: string;
   metadata?: Record<string, string>;
+  acl?: "private" | "public-read";
 };
 
 export function createMultipartInitHandler(config: S3HandlerConfig) {
@@ -29,6 +30,8 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
 
     const bucket = body.bucket?.trim() || config.defaultBucket;
 
+    const acl = body.acl === "public-read" ? "public-read" : "private";
+
     const guardResult = await runHook(config.hooks?.multipart?.guard, {
       request,
       key,
@@ -42,6 +45,7 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
         Key: key,
         ContentType: body.contentType,
         Metadata: body.metadata,
+        ACL: acl,
       }),
     );
 
@@ -52,6 +56,7 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
       uploadId: UploadId!,
       contentType: body.contentType,
       metadata: body.metadata,
+      acl,
     });
 
     return Response.json({ bucket, key, uploadId: UploadId }, { status: 201 });

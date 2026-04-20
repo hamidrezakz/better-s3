@@ -20,6 +20,7 @@ export async function uploadMultipart(
     contentType,
     metadata: requestOptions?.metadata,
     bucket: requestOptions?.bucket,
+    acl: requestOptions?.acl,
   });
 
   const totalParts = Math.ceil(file.size / partSize);

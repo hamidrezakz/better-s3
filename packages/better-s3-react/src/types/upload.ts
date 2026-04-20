@@ -26,6 +26,8 @@ export type UploadRequestOptions = {
   bucket?: string;
   /** Override auto-detected content type */
   contentType?: string;
+  /** Object ACL – defaults to `'private'` */
+  acl?: "private" | "public-read";
 };
 
 export type UploadHooks = {

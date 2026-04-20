@@ -15,6 +15,7 @@ type Payload = {
   metadata?: Record<string, string>;
   bucket?: string;
   expiresIn?: number;
+  acl?: "private" | "public-read";
 };
 
 export function createUploadHandler(config: S3HandlerConfig) {
@@ -33,12 +34,15 @@ export function createUploadHandler(config: S3HandlerConfig) {
     const bucket = body.bucket?.trim() || config.defaultBucket;
     const expiresIn = normalizeExpiresIn(body.expiresIn);
 
+    const acl = body.acl === "public-read" ? "public-read" : "private";
+
     const guardResult = await runHook(config.hooks?.upload?.guard, {
       request,
       key,
       bucket,
       contentType: body.contentType,
       metadata: body.metadata,
+      acl,
     });
     if (guardResult) return guardResult;
 
@@ -49,6 +53,7 @@ export function createUploadHandler(config: S3HandlerConfig) {
         Key: key,
         ContentType: body.contentType,
         Metadata: body.metadata,
+        ACL: acl,
       }),
       { expiresIn },
     );
@@ -59,6 +64,7 @@ export function createUploadHandler(config: S3HandlerConfig) {
       bucket,
       contentType: body.contentType,
       metadata: body.metadata,
+      acl,
       url,
       expiresIn,
     });

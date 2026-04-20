@@ -54,6 +54,7 @@ export async function uploadFile(
           contentType,
           metadata: requestOptions?.metadata,
           bucket: requestOptions?.bucket,
+          acl: requestOptions?.acl,
         });
         return uploadSimple(file, presign.url, callbacks.onProgress, signal);
       },
