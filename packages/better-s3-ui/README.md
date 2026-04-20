@@ -1,22 +1,18 @@
 # @better-s3/ui
 
-Pre-built React UI components for S3 file upload, download, and delete — built with [shadcn/ui](https://ui.shadcn.com) patterns and Tailwind CSS.
+Pre-built React components for S3 file operations — upload (button & dropzone), download, and delete with confirmation. Built with [shadcn/ui](https://ui.shadcn.com) and Tailwind CSS.
 
-> **Don't need pre-built UI?** Use [`@better-s3/react`](../better-s3-react) for headless hooks and bring your own components.
-
-> **shadcn CLI**: You can also install individual components via `npx shadcn add` (coming soon).
+> **Need full control?** Use [`@better-s3/react`](../better-s3-react) for headless hooks.
 
 ## Install
 
 ```bash
-pnpm add @better-s3/ui @better-s3/core
+pnpm add @better-s3/ui @better-s3/server
 ```
 
-**Peer dependencies:** `react`, `@base-ui/react`, `sonner`, `lucide-react`, `class-variance-authority`, `clsx`, `tailwind-merge`
+**Peer deps:** `react`, `sonner`, `lucide-react`, `clsx`, `tailwind-merge`
 
 ## Setup
-
-Import the stylesheet in your app:
 
 ```tsx
 import "@better-s3/ui/styles.css";
@@ -24,74 +20,34 @@ import "@better-s3/ui/styles.css";
 
 ## Components
 
-### `<Upload />` — Single file upload
-
 ```tsx
-import { Upload } from "@better-s3/ui";
-import { createPresignApi } from "@better-s3/core";
+import { createPresignApi } from "@better-s3/server";
+import { Upload, MultiUpload, DownloadButton, DeleteButton } from "@better-s3/ui";
 
-const presignApi = createPresignApi({ basePath: "/api/s3" });
+const presignApi = createPresignApi("/api/s3");
 
+// Single upload (button or dropzone)
 <Upload
   presignApi={presignApi}
   objectKey={(file) => `uploads/${file.name}`}
-  variant="dropzone" // "button" | "dropzone"
+  variant="dropzone"
   accept={["image/*"]}
   maxFileSize={10 * 1024 * 1024}
-  toast={true} // sonner toast notifications
-  showStatus={true} // inline progress display
-/>;
-```
+/>
 
-### `<MultiUpload />` — Batch file upload
-
-```tsx
-import { MultiUpload } from "@better-s3/ui";
-
+// Batch upload
 <MultiUpload
   presignApi={presignApi}
   objectKey={(file) => `uploads/${file.name}`}
   maxFiles={10}
-  variant="dropzone"
-/>;
+/>
+
+// Download
+<DownloadButton presignApi={presignApi} objectKey="report.pdf" fileName="report.pdf" />
+
+// Delete with confirmation dialog
+<DeleteButton presignApi={presignApi} objectKey="report.pdf" />
 ```
-
-### `<DownloadButton />` — File download
-
-```tsx
-import { DownloadButton } from "@better-s3/ui";
-
-<DownloadButton
-  presignApi={presignApi}
-  objectKey="uploads/report.pdf"
-  fileName="report.pdf"
-  mode="native" // "native" | "fetch"
-/>;
-```
-
-### `<DeleteButton />` — File delete with confirmation
-
-```tsx
-import { DeleteButton } from "@better-s3/ui";
-
-<DeleteButton
-  presignApi={presignApi}
-  objectKey="uploads/report.pdf"
-  fileName="report.pdf"
-  confirmTitle="Delete file?"
-  confirmDescription="This action cannot be undone."
-/>;
-```
-
-## Features
-
-- **Two upload variants** — compact button or drag-and-drop dropzone
-- **Toast notifications** — loading, success, and error toasts via Sonner
-- **Inline progress** — progress bar with file name and phase icons
-- **Delete confirmation** — AlertDialog before destructive actions
-- **Download modes** — native browser download or streaming with progress
-- **Tailwind CSS** — fully styled, customizable via className props
-- **Accessible** — built on Base UI primitives
 
 ## License
 
