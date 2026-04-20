@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { PresignApi } from "@better-s3/server";
+import type { S3Api } from "@better-s3/server";
 import { validateFile } from "@better-s3/server";
 import type {
   UploadConfig,
@@ -15,7 +15,7 @@ import { uploadFile } from "./upload";
 
 export type UseUploadOptions = UploadConfig &
   UploadHooks & {
-    presignApi: PresignApi;
+    api: S3Api;
   };
 
 export type UseUploadState = {
@@ -99,7 +99,7 @@ export function useUpload(options: UseUploadOptions): UseUploadReturn {
 
       try {
         const result = await uploadFile(
-          opts.presignApi,
+          opts.api,
           file,
           objectKey,
           {

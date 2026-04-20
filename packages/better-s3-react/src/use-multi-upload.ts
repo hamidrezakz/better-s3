@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { PresignApi } from "@better-s3/server";
+import type { S3Api } from "@better-s3/server";
 import { validateFile } from "@better-s3/server";
 import type {
   UploadConfig,
@@ -16,7 +16,7 @@ import { uploadFiles } from "./upload";
 
 export type UseMultiUploadOptions = UploadConfig &
   MultiUploadHooks & {
-    presignApi: PresignApi;
+    api: S3Api;
     /** Static request options applied to all files */
     uploadOptions?: UploadRequestOptions;
     /** Per-file request options (overrides uploadOptions) */
@@ -141,7 +141,7 @@ export function useMultiUpload(
 
       try {
         const results = await uploadFiles(
-          opts.presignApi,
+          opts.api,
           items,
           {
             multipart: opts.multipart,

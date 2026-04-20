@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { createPresignApi } from "@better-s3/server";
+import { createS3Api } from "@better-s3/server";
 import {
   useUpload,
   useDownload,
@@ -10,8 +10,8 @@ import {
   useDelete,
 } from "@better-s3/react";
 
-// ── Presign API client ─────────────────────────────────────────────
-const presignApi = createPresignApi("/api/s3");
+// ── S3 API client ──────────────────────────────────────────────────
+const api = createS3Api("/api/s3");
 
 export default function HeadlessPage() {
   return (
@@ -38,7 +38,7 @@ export default function HeadlessPage() {
 function UploadDemo() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { phase, progress, error, upload, cancel, reset } = useUpload({
-    presignApi,
+    api,
     accept: ["image/*", ".pdf"],
     maxFileSize: 10 * 1024 * 1024,
     onSuccess: (_file, result) => {
@@ -113,7 +113,7 @@ function UploadDemo() {
 // ── useDownload Demo ───────────────────────────────────────────────
 function DownloadDemo() {
   const { phase, error, download, reset } = useDownload({
-    presignApi,
+    api,
     onSuccess: (key) => console.log("Downloaded:", key),
   });
 
@@ -151,7 +151,7 @@ function DownloadDemo() {
 // ── useFetchDownload Demo ──────────────────────────────────────────
 function FetchDownloadDemo() {
   const { phase, progress, error, download, cancel, reset } = useFetchDownload({
-    presignApi,
+    api,
     onSuccess: (key) => console.log("Downloaded:", key),
   });
 
@@ -209,7 +209,7 @@ function FetchDownloadDemo() {
 function DeleteDemo() {
   const { phase, pendingKey, requestDelete, confirmDelete, cancelDelete } =
     useDelete({
-      presignApi,
+      api,
       onSuccess: (key) => console.log("Deleted:", key),
     });
 

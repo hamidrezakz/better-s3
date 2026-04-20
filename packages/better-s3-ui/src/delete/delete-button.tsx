@@ -4,7 +4,7 @@ import { Trash2Icon, LoaderIcon, AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@better-s3/react";
-import type { PresignApi, DeleteHooks } from "@better-s3/react";
+import type { S3Api, DeleteHooks } from "@better-s3/react";
 import { useDelete } from "@better-s3/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/tooltip";
 
 type DeleteButtonProps = DeleteHooks & {
-  presignApi: PresignApi;
+  api: S3Api;
   objectKey: string;
   fileName?: string;
   fileSize?: number;
@@ -46,7 +46,7 @@ type DeleteButtonProps = DeleteHooks & {
 };
 
 export function DeleteButton({
-  presignApi,
+  api,
   objectKey,
   fileName,
   fileSize,
@@ -67,7 +67,7 @@ export function DeleteButton({
   const displayName = fileName ?? objectKey.split("/").pop() ?? objectKey;
 
   const del = useDelete({
-    presignApi,
+    api,
     bucket,
     beforeDelete,
     onDeleteStart,

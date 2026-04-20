@@ -4,7 +4,7 @@ import type {
   UploadResult,
   UploadRequestOptions,
 } from "../types";
-import type { PresignApi } from "@better-s3/server";
+import type { S3Api } from "@better-s3/server";
 import { DEFAULT_CONCURRENT_FILES } from "./constants";
 import { uploadFile } from "./upload-file";
 
@@ -28,7 +28,7 @@ export type MultiUploadCallbacks = {
 };
 
 export async function uploadFiles(
-  presignApi: PresignApi,
+  api: S3Api,
   items: Array<{ id: string; file: File; objectKey: string }>,
   config: UploadConfig = {},
   callbacks: MultiUploadCallbacks = {},
@@ -65,7 +65,7 @@ export async function uploadFiles(
 
       try {
         const result = await uploadFile(
-          presignApi,
+          api,
           item.file,
           item.objectKey,
           config,

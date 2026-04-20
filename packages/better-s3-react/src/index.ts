@@ -16,9 +16,11 @@ export {
 
 // Re-exports from @better-s3/server
 export {
-  createPresignApi,
+  createS3Api,
+  createS3Api as createPresignApi,
   validateFile,
-  type PresignApi,
+  type S3Api,
+  type S3Api as PresignApi,
   type PresignResponse,
   type MultipartInitResponse,
   type MultipartPartResponse,

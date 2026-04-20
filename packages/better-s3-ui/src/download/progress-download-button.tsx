@@ -4,7 +4,7 @@ import { DownloadIcon, AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@better-s3/react";
-import type { PresignApi, FetchDownloadHooks } from "@better-s3/react";
+import type { S3Api, FetchDownloadHooks } from "@better-s3/react";
 import { useFetchDownload } from "@better-s3/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 
 type ProgressDownloadButtonProps = FetchDownloadHooks & {
-  presignApi: PresignApi;
+  api: S3Api;
   objectKey: string;
   fileName?: string;
   fileSize?: number;
@@ -33,7 +33,7 @@ type ProgressDownloadButtonProps = FetchDownloadHooks & {
 };
 
 export function ProgressDownloadButton({
-  presignApi,
+  api,
   objectKey,
   fileName,
   fileSize,
@@ -55,7 +55,7 @@ export function ProgressDownloadButton({
   const displayName = fileName ?? objectKey.split("/").pop() ?? objectKey;
 
   const dl = useFetchDownload({
-    presignApi,
+    api,
     bucket,
     beforeDownload,
     onDownloadStart,

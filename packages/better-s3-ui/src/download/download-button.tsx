@@ -3,71 +3,44 @@
 import { DownloadIcon, AlertCircleIcon, LoaderIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { formatFileSize } from "@better-s3/react";
-import type { PresignApi, DownloadHooks } from "@better-s3/react";
+import type { S3Api } from "@better-s3/react";
 import { useDownload } from "@better-s3/react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-type DownloadButtonProps = DownloadHooks & {
-  presignApi: PresignApi;
+type DownloadButtonProps = {
+  api: S3Api;
   objectKey: string;
   fileName?: string;
-  fileSize?: number;
-  /** Target bucket (overrides server default) */
-  bucket?: string;
   label?: string;
   className?: string;
   disabled?: boolean;
-  tooltipText?: string;
   /** Enable sonner toasts (default: `true`) */
   toast?: boolean;
-  /** Show inline error status below the button (default: `true`) */
-  showStatus?: boolean;
 };
 
 export function DownloadButton({
-  presignApi,
+  api,
   objectKey,
   fileName,
-  fileSize,
-  bucket,
   label,
   className,
   disabled,
-  tooltipText = "Download file",
   toast: enableToast = true,
-  showStatus = true,
-  beforeDownload,
-  onSuccess,
-  onError,
 }: DownloadButtonProps) {
   const displayName = fileName ?? objectKey.split("/").pop() ?? objectKey;
 
   const dl = useDownload({
-    presignApi,
-    bucket,
-    beforeDownload,
-    onSuccess: (key) => {
-      if (enableToast) {
-        toast.success("Download complete", {
-          description: `${displayName}${fileSize != null ? ` · ${formatFileSize(fileSize)}` : ""}`,
-        });
-      }
-      onSuccess?.(key);
+    api,
+    onSuccess: () => {
+      if (enableToast)
+        toast.success("Download complete", { description: displayName });
     },
-    onError: (key, error) => {
+    onError: (_key, error) => {
       if (enableToast) {
         toast.error("Download failed", {
           description: error instanceof Error ? error.message : "Unknown error",
         });
       }
-      onError?.(key, error);
     },
   });
 
@@ -75,42 +48,25 @@ export function DownloadButton({
 
   return (
     <div className={cn("inline-flex flex-col gap-1.5", className)}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                size="default"
-                variant="outline"
-                disabled={disabled || isLoading}
-                onClick={() => dl.download(objectKey, displayName)}
-              />
-            }>
-            <span className="inline-flex items-center gap-1">
-              {isLoading ? (
-                <LoaderIcon className="animate-spin" data-icon="inline-start" />
-              ) : (
-                <DownloadIcon data-icon="inline-start" />
-              )}
-              {label ?? "Download"}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{tooltipText}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Button
+        size="default"
+        variant="outline"
+        disabled={disabled || isLoading}
+        onClick={() => dl.download(objectKey, displayName)}>
+        <span className="inline-flex items-center gap-1">
+          {isLoading ? (
+            <LoaderIcon className="animate-spin" data-icon="inline-start" />
+          ) : (
+            <DownloadIcon data-icon="inline-start" />
+          )}
+          {label ?? "Download"}
+        </span>
+      </Button>
 
-      {showStatus && dl.phase === "error" && (
-        <div className="flex flex-col gap-1 text-xs">
-          <div className="flex items-center gap-1.5">
-            <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
-            <span className="max-w-32 min-w-16 truncate sm:max-w-48">
-              {dl.fileName ?? displayName}
-            </span>
-          </div>
-          <span className="text-destructive">
-            {dl.error ?? "Download failed"}
-          </span>
-        </div>
+      {dl.phase === "error" && (
+        <span className="text-xs text-destructive">
+          {dl.error ?? "Download failed"}
+        </span>
       )}
     </div>
   );

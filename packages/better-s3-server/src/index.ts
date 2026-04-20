@@ -10,14 +10,20 @@ export { createMultipartPartHandler } from "./handlers/multipart/part";
 export { createMultipartCompleteHandler } from "./handlers/multipart/complete";
 export { createMultipartAbortHandler } from "./handlers/multipart/abort";
 
-// Presign API client
+// S3 API client
 export {
-  createPresignApi,
-  type PresignApi,
+  createS3Api,
+  type S3Api,
   type PresignResponse,
   type MultipartInitResponse,
   type MultipartPartResponse,
   type UploadConfirmResponse,
+} from "./presign-api";
+
+// Backward-compat aliases
+export {
+  createS3Api as createPresignApi,
+  type S3Api as PresignApi,
 } from "./presign-api";
 
 // Validation

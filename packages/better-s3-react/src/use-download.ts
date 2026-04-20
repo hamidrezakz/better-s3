@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { PresignApi } from "@better-s3/server";
+import type { S3Api } from "@better-s3/server";
 
 export type DownloadPhase = "idle" | "downloading" | "success" | "error";
 
@@ -12,7 +12,7 @@ export type DownloadHooks = {
 };
 
 export type UseDownloadOptions = DownloadHooks & {
-  presignApi: PresignApi;
+  api: S3Api;
   /** Target bucket (overrides server default) */
   bucket?: string;
 };
@@ -59,7 +59,7 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
     setState({ phase: "downloading", error: null, fileName: name });
 
     try {
-      const { url } = await opts.presignApi.download(key, {
+      const { url } = await opts.api.download(key, {
         fileName: name,
         bucket: opts.bucket,
       });

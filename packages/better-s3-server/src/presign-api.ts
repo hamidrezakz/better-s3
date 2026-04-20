@@ -27,7 +27,7 @@ export type UploadConfirmResponse = {
   eTag?: string;
 };
 
-export type PresignApi = {
+export type S3Api = {
   upload: (payload: {
     key: string;
     contentType?: string;
@@ -73,7 +73,7 @@ export type PresignApi = {
   };
 };
 
-export function createPresignApi(basePath = "/api/s3"): PresignApi {
+export function createS3Api(basePath = "/api/s3"): S3Api {
   const base = basePath.replace(/\/$/, "");
 
   const json = async <T>(url: string, init?: RequestInit): Promise<T> => {

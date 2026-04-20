@@ -57,17 +57,31 @@ createRouteHandler({
       if (!session) throw new Error("Unauthorized");
     },
     upload: {
-      onSuccess: async ({ request, key, contentType }) => { /* ... */ },
-      onComplete: async ({ key, contentType, contentLength, eTag }) => { /* ... */ },
+      onSuccess: async ({ request, key, contentType }) => {
+        /* ... */
+      },
+      onComplete: async ({ key, contentType, contentLength, eTag }) => {
+        /* ... */
+      },
     },
     delete: {
-      guard: async ({ request, key }) => { /* ownership check */ },
-      onSuccess: async ({ key }) => { /* remove DB record */ },
+      guard: async ({ request, key }) => {
+        /* ownership check */
+      },
+      onSuccess: async ({ key }) => {
+        /* remove DB record */
+      },
     },
     multipart: {
-      onInit: async ({ key, uploadId }) => { /* ... */ },
-      onComplete: async ({ key, uploadId }) => { /* ... */ },
-      onAbort: async ({ key, uploadId }) => { /* ... */ },
+      onInit: async ({ key, uploadId }) => {
+        /* ... */
+      },
+      onComplete: async ({ key, uploadId }) => {
+        /* ... */
+      },
+      onAbort: async ({ key, uploadId }) => {
+        /* ... */
+      },
     },
   },
 });
@@ -77,27 +91,30 @@ createRouteHandler({
 
 ## API Routes
 
-| Method | Path | Description |
-| --- | --- | --- |
-| `POST` | `/presign/upload` | Presigned upload URL |
-| `POST` | `/presign/upload/confirm` | Confirm upload |
-| `GET` | `/presign/download` | Presigned download URL |
-| `DELETE` | `/delete` | Delete object |
-| `POST` | `/presign/multipart/init` | Init multipart |
-| `POST` | `/presign/multipart/part` | Sign part |
-| `POST` | `/presign/multipart/complete` | Complete multipart |
-| `POST` | `/presign/multipart/abort` | Abort multipart |
+| Method   | Path                          | Description            |
+| -------- | ----------------------------- | ---------------------- |
+| `POST`   | `/presign/upload`             | Presigned upload URL   |
+| `POST`   | `/presign/upload/confirm`     | Confirm upload         |
+| `GET`    | `/presign/download`           | Presigned download URL |
+| `DELETE` | `/delete`                     | Delete object          |
+| `POST`   | `/presign/multipart/init`     | Init multipart         |
+| `POST`   | `/presign/multipart/part`     | Sign part              |
+| `POST`   | `/presign/multipart/complete` | Complete multipart     |
+| `POST`   | `/presign/multipart/abort`    | Abort multipart        |
 
-## Presign API Client
+## S3 API Client
 
 Client-side helper for calling the server endpoints (used internally by `@better-s3/react`):
 
 ```ts
-import { createPresignApi } from "@better-s3/server";
+import { createS3Api } from "@better-s3/server";
 
-const api = createPresignApi("/api/s3");
+const api = createS3Api("/api/s3");
 
-const { url } = await api.upload({ key: "photo.jpg", contentType: "image/jpeg" });
+const { url } = await api.upload({
+  key: "photo.jpg",
+  contentType: "image/jpeg",
+});
 const { url: downloadUrl } = await api.download("photo.jpg");
 await api.delete("photo.jpg");
 ```

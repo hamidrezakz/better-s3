@@ -13,9 +13,9 @@ pnpm add @better-s3/react @better-s3/server
 ## Setup
 
 ```ts
-import { createPresignApi } from "@better-s3/server";
+import { createS3Api } from "@better-s3/server";
 
-const presignApi = createPresignApi("/api/s3");
+const api = createS3Api("/api/s3");
 ```
 
 ## Hooks
@@ -24,7 +24,7 @@ const presignApi = createPresignApi("/api/s3");
 
 ```tsx
 const { phase, progress, error, upload, cancel, reset } = useUpload({
-  presignApi,
+  api,
   accept: ["image/*"],
   maxFileSize: 10 * 1024 * 1024,
   onSuccess: (_file, result) => console.log("Uploaded:", result.key),
@@ -40,7 +40,7 @@ await upload(file, `uploads/${file.name}`, { metadata: { source: "web" } });
 ```tsx
 const { phase, progress, openFilePicker, inputProps, dropHandlers } =
   useUploadControls({
-    presignApi,
+    api,
     objectKey: (file) => `uploads/${file.name}`,
   });
 ```
@@ -49,7 +49,7 @@ const { phase, progress, openFilePicker, inputProps, dropHandlers } =
 
 ```tsx
 const { phase, files, totalProgress, upload, cancel } = useMultiUpload({
-  presignApi,
+  api,
   maxFiles: 10,
   concurrentFiles: 3,
 });
@@ -64,9 +64,8 @@ Same as `useUploadControls` but for multiple files.
 ### `useDownload` — File download
 
 ```tsx
-const { phase, progress, download, cancel } = useDownload({
-  presignApi,
-  mode: "fetch", // or "native"
+const { phase, error, download, reset } = useDownload({
+  api,
 });
 
 download("uploads/photo.jpg", "photo.jpg");
@@ -76,10 +75,10 @@ download("uploads/photo.jpg", "photo.jpg");
 
 ```tsx
 const { phase, pendingKey, requestDelete, confirmDelete, cancelDelete } =
-  useDelete({ presignApi });
+  useDelete({ api });
 
 requestDelete("uploads/photo.jpg"); // phase → "confirming"
-confirmDelete();                    // phase → "deleting" → "success"
+confirmDelete(); // phase → "deleting" → "success"
 ```
 
 ## License

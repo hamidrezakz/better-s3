@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createPresignApi } from "@better-s3/server";
+import { createS3Api } from "@better-s3/server";
 import {
   Upload,
   MultiUpload,
@@ -10,8 +10,8 @@ import {
   DeleteButton,
 } from "@better-s3/ui";
 
-// ── Presign API client — calls your /api/s3 route ──────────────────
-const presignApi = createPresignApi("/api/s3");
+// ── S3 API client — calls your /api/s3 route ──────────────────────
+const api = createS3Api("/api/s3");
 
 export default function UploadPage() {
   return (
@@ -30,7 +30,7 @@ export default function UploadPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Single Upload (dropzone)</h2>
         <Upload
-          presignApi={presignApi}
+          api={api}
           objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
           variant="dropzone"
           accept={["image/*", ".pdf"]}
@@ -41,7 +41,7 @@ export default function UploadPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Single Upload (button)</h2>
         <Upload
-          presignApi={presignApi}
+          api={api}
           objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
           variant="button"
           accept={["image/*"]}
@@ -52,7 +52,7 @@ export default function UploadPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Multi Upload</h2>
         <MultiUpload
-          presignApi={presignApi}
+          api={api}
           objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
           maxFiles={5}
           variant="dropzone"
@@ -69,20 +69,17 @@ export default function UploadPage() {
         </p>
         <div className="flex flex-wrap gap-3">
           <DownloadButton
-            presignApi={presignApi}
+            api={api}
             objectKey="uploads/example.jpg"
             fileName="example.jpg"
           />
           <ProgressDownloadButton
-            presignApi={presignApi}
+            api={api}
             objectKey="uploads/example.jpg"
             fileName="example.jpg"
             label="Download (with progress)"
           />
-          <DeleteButton
-            presignApi={presignApi}
-            objectKey="uploads/example.jpg"
-          />
+          <DeleteButton api={api} objectKey="uploads/example.jpg" />
         </div>
       </section>
     </main>

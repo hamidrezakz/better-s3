@@ -4,7 +4,7 @@ import type {
   UploadResult,
   UploadRequestOptions,
 } from "../types";
-import type { PresignApi } from "@better-s3/server";
+import type { S3Api } from "@better-s3/server";
 import {
   DEFAULT_MULTIPART_THRESHOLD,
   DEFAULT_CONCURRENT_PARTS,
@@ -20,7 +20,7 @@ export type UploadEngineCallbacks = {
 };
 
 export async function uploadFile(
-  presignApi: PresignApi,
+  api: S3Api,
   file: File,
   objectKey: string,
   config: UploadConfig = {},
@@ -37,7 +37,7 @@ export async function uploadFile(
 
   if (useMultipart) {
     await uploadMultipart(
-      presignApi,
+      api,
       file,
       objectKey,
       DEFAULT_PART_SIZE,
@@ -49,7 +49,7 @@ export async function uploadFile(
   } else {
     eTag = await withRetry(
       async () => {
-        const presign = await presignApi.upload({
+        const presign = await api.upload({
           key: objectKey,
           contentType,
           metadata: requestOptions?.metadata,
@@ -61,7 +61,7 @@ export async function uploadFile(
       signal,
     );
 
-    await presignApi.confirm({
+    await api.confirm({
       key: objectKey,
       bucket: requestOptions?.bucket,
     });
