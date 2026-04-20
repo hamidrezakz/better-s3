@@ -1,6 +1,6 @@
 {
   "name": "@better-s3/ui",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Pre-built React UI components for S3 file upload, download, and delete",
   "keywords": [
     "s3",
