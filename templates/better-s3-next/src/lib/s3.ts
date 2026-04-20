@@ -1,4 +1,5 @@
 import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Api } from "@better-s3/server";
 
 /**
  * S3-compatible client configuration.
@@ -24,3 +25,6 @@ export const s3 = new S3Client({
 
 /** Default bucket name from environment */
 export const defaultBucket = process.env.R2_DEFAULT_BUCKET_NAME!;
+
+/** S3 API client for better-s3 server. Points to our Next.js API route that wraps the S3 client.*/
+export const s3Api = createS3Api("/api/s3");

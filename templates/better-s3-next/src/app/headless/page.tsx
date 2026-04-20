@@ -2,16 +2,13 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { createS3Api } from "@better-s3/server";
+import { s3Api as api } from "@/lib/s3";
 import {
   useUpload,
   useDownload,
   useFetchDownload,
   useDelete,
 } from "@better-s3/react";
-
-// ── S3 API client ──────────────────────────────────────────────────
-const api = createS3Api("/api/s3");
 
 export default function HeadlessPage() {
   return (

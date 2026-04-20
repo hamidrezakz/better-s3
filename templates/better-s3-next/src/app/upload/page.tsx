@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createS3Api } from "@better-s3/server";
+import { s3Api as api } from "@/lib/s3";
 import {
   Upload,
   MultiUpload,
@@ -9,9 +9,6 @@ import {
   ProgressDownloadButton,
   DeleteButton,
 } from "@better-s3/ui";
-
-// ── S3 API client — calls your /api/s3 route ──────────────────────
-const api = createS3Api("/api/s3");
 
 export default function UploadPage() {
   return (
