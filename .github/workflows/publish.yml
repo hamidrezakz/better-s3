@@ -59,15 +59,6 @@ jobs:
           fi
           npm whoami
 
-      - name: Publish @better-s3/core
-        run: |
-          VERSION=$(node -p "require('./packages/better-s3-core/package.json').version")
-          if npm view @better-s3/core@$VERSION version > /dev/null 2>&1; then
-            echo "core@$VERSION already published, skipping."
-          else
-            pnpm --filter @better-s3/core publish --access public --no-git-checks
-          fi
-
       - name: Publish @better-s3/server
         run: |
           VERSION=$(node -p "require('./packages/better-s3-server/package.json').version")
