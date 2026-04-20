@@ -3,4 +3,5 @@ export { MultiUpload, type MultiUploadProps } from "@/upload/multi-upload";
 export { UploadStatus } from "@/upload/upload-status";
 export { MultiUploadStatus } from "@/upload/multi-upload-status";
 export { DownloadButton } from "@/download/download-button";
+export { FetchDownloadButton } from "@/download/fetch-download-button";
 export { DeleteButton } from "@/delete/delete-button";

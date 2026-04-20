@@ -1,11 +1,11 @@
 "use client";
 
-import { DownloadIcon, AlertCircleIcon, LoaderIcon } from "lucide-react";
+import { DownloadIcon, AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@better-s3/react";
-import type { PresignApi, DownloadHooks } from "@better-s3/react";
-import { useDownload } from "@better-s3/react";
+import type { PresignApi, FetchDownloadHooks } from "@better-s3/react";
+import { useFetchDownload } from "@better-s3/react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type DownloadButtonProps = DownloadHooks & {
+type FetchDownloadButtonProps = FetchDownloadHooks & {
   presignApi: PresignApi;
   objectKey: string;
   fileName?: string;
@@ -23,6 +23,7 @@ type DownloadButtonProps = DownloadHooks & {
   bucket?: string;
   label?: string;
   className?: string;
+  fillClassName?: string;
   disabled?: boolean;
   tooltipText?: string;
   /** Enable sonner toasts (default: `true`) */
@@ -31,7 +32,7 @@ type DownloadButtonProps = DownloadHooks & {
   showStatus?: boolean;
 };
 
-export function DownloadButton({
+export function FetchDownloadButton({
   presignApi,
   objectKey,
   fileName,
@@ -39,39 +40,62 @@ export function DownloadButton({
   bucket,
   label,
   className,
+  fillClassName,
   disabled,
   tooltipText = "Download file",
   toast: enableToast = true,
   showStatus = true,
   beforeDownload,
+  onDownloadStart,
+  onProgress,
   onSuccess,
   onError,
-}: DownloadButtonProps) {
+  onCancel,
+}: FetchDownloadButtonProps) {
   const displayName = fileName ?? objectKey.split("/").pop() ?? objectKey;
 
-  const dl = useDownload({
+  const dl = useFetchDownload({
     presignApi,
     bucket,
     beforeDownload,
+    onDownloadStart,
+    onProgress,
     onSuccess: (key) => {
       if (enableToast) {
+        toast.dismiss(`dl-${objectKey}`);
         toast.success("Download complete", {
           description: `${displayName}${fileSize != null ? ` · ${formatFileSize(fileSize)}` : ""}`,
         });
       }
       onSuccess?.(key);
     },
-    onError: (key, error) => {
+    onError: (key, error, phase) => {
       if (enableToast) {
+        toast.dismiss(`dl-${objectKey}`);
         toast.error("Download failed", {
           description: error instanceof Error ? error.message : "Unknown error",
         });
       }
-      onError?.(key, error);
+      onError?.(key, error, phase);
+    },
+    onCancel: (key) => {
+      if (enableToast) {
+        toast.dismiss(`dl-${objectKey}`);
+        toast.info("Download cancelled", { description: displayName });
+      }
+      onCancel?.(key);
     },
   });
 
-  const isLoading = dl.phase === "downloading";
+  const isDownloading = dl.phase === "downloading" || dl.phase === "presigning";
+
+  const handleClick = () => {
+    if (isDownloading) {
+      dl.cancel();
+      return;
+    }
+    dl.download(objectKey, displayName);
+  };
 
   return (
     <div className={cn("inline-flex flex-col gap-1.5", className)}>
@@ -82,20 +106,30 @@ export function DownloadButton({
               <Button
                 size="default"
                 variant="outline"
-                disabled={disabled || isLoading}
-                onClick={() => dl.download(objectKey, displayName)}
+                disabled={disabled}
+                className={cn("relative min-w-24 overflow-hidden")}
+                onClick={handleClick}
               />
             }>
-            <span className="inline-flex items-center gap-1">
-              {isLoading ? (
-                <LoaderIcon className="animate-spin" data-icon="inline-start" />
-              ) : (
-                <DownloadIcon data-icon="inline-start" />
-              )}
-              {label ?? "Download"}
+            {isDownloading && (
+              <span
+                className={cn(
+                  "absolute inset-0 bg-primary/15 transition-[width] duration-200",
+                  fillClassName,
+                )}
+                style={{ width: `${dl.progress.percent}%` }}
+              />
+            )}
+            <span className="relative z-10 inline-flex items-center gap-1">
+              <DownloadIcon data-icon="inline-start" />
+              {isDownloading
+                ? formatFileSize(dl.progress.loaded)
+                : (label ?? "Download")}
             </span>
           </TooltipTrigger>
-          <TooltipContent>{tooltipText}</TooltipContent>
+          <TooltipContent>
+            {isDownloading ? "Cancel download" : tooltipText}
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 

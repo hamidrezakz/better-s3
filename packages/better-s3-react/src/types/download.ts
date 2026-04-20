@@ -1,21 +1,12 @@
-export type DownloadPhase =
-  | "idle"
-  | "presigning"
-  | "downloading"
-  | "success"
-  | "error";
+// Download types are co-located with their respective hooks:
+// - useDownload     → ./use-download.ts
+// - useFetchDownload → ./use-fetch-download.ts
+//
+// Re-export for convenience.
+export type { DownloadPhase, DownloadHooks } from "../use-download";
 
-export type DownloadProgress = {
-  loaded: number;
-  total: number;
-  percent: number;
-};
-
-export type DownloadHooks = {
-  beforeDownload?: (key: string) => Promise<boolean> | boolean;
-  onDownloadStart?: (key: string) => void;
-  onProgress?: (key: string, progress: DownloadProgress) => void;
-  onSuccess?: (key: string) => Promise<void> | void;
-  onError?: (key: string, error: unknown, phase: DownloadPhase) => void;
-  onCancel?: (key: string) => void;
-};
+export type {
+  FetchDownloadPhase,
+  FetchDownloadProgress,
+  FetchDownloadHooks,
+} from "../use-fetch-download";

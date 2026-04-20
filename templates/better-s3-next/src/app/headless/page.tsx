@@ -3,7 +3,12 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { createPresignApi } from "@better-s3/server";
-import { useUpload, useDownload, useDelete } from "@better-s3/react";
+import {
+  useUpload,
+  useDownload,
+  useFetchDownload,
+  useDelete,
+} from "@better-s3/react";
 
 // ── Presign API client ─────────────────────────────────────────────
 const presignApi = createPresignApi("/api/s3");
@@ -23,6 +28,7 @@ export default function HeadlessPage() {
 
       <UploadDemo />
       <DownloadDemo />
+      <FetchDownloadDemo />
       <DeleteDemo />
     </main>
   );
@@ -106,9 +112,8 @@ function UploadDemo() {
 
 // ── useDownload Demo ───────────────────────────────────────────────
 function DownloadDemo() {
-  const { phase, progress, download, cancel } = useDownload({
+  const { phase, error, download, reset } = useDownload({
     presignApi,
-    mode: "native",
     onSuccess: (key) => console.log("Downloaded:", key),
   });
 
@@ -116,7 +121,7 @@ function DownloadDemo() {
     <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
       <h2 className="font-semibold">useDownload</h2>
       <p className="text-sm text-zinc-500">
-        Replace the key below with an actual object key.
+        Simple download — fetches the file and triggers a browser save dialog.
       </p>
 
       <div className="flex items-center gap-3">
@@ -124,9 +129,49 @@ function DownloadDemo() {
           onClick={() => download("uploads/example.jpg", "example.jpg")}
           disabled={phase === "downloading"}
           className="rounded-md bg-zinc-900 px-4 py-2 text-sm text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+          {phase === "downloading" ? "Downloading…" : "Download"}
+        </button>
+
+        {phase === "error" && (
+          <button onClick={reset} className="text-sm text-zinc-500">
+            Reset
+          </button>
+        )}
+      </div>
+
+      {phase === "error" && (
+        <p className="text-sm text-red-500">
+          Error: {error ?? "Download failed"}
+        </p>
+      )}
+    </section>
+  );
+}
+
+// ── useFetchDownload Demo ──────────────────────────────────────────
+function FetchDownloadDemo() {
+  const { phase, progress, error, download, cancel, reset } = useFetchDownload({
+    presignApi,
+    onSuccess: (key) => console.log("Downloaded:", key),
+  });
+
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+      <h2 className="font-semibold">useFetchDownload</h2>
+      <p className="text-sm text-zinc-500">
+        Streams via fetch — shows real-time progress and supports cancellation.
+      </p>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => download("uploads/example.jpg", "example.jpg")}
+          disabled={phase === "downloading" || phase === "presigning"}
+          className="rounded-md bg-zinc-900 px-4 py-2 text-sm text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
           {phase === "downloading"
             ? `Downloading ${progress.percent}%`
-            : "Download"}
+            : phase === "presigning"
+              ? "Preparing…"
+              : "Download (with progress)"}
         </button>
 
         {phase === "downloading" && (
@@ -134,7 +179,28 @@ function DownloadDemo() {
             Cancel
           </button>
         )}
+
+        {phase === "error" && (
+          <button onClick={reset} className="text-sm text-zinc-500">
+            Reset
+          </button>
+        )}
       </div>
+
+      {phase === "downloading" && (
+        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+          <div
+            className="h-full bg-blue-500 transition-all"
+            style={{ width: `${progress.percent}%` }}
+          />
+        </div>
+      )}
+
+      {phase === "error" && (
+        <p className="text-sm text-red-500">
+          Error: {error ?? "Download failed"}
+        </p>
+      )}
     </section>
   );
 }

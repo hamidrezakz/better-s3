@@ -6,6 +6,7 @@ import {
   Upload,
   MultiUpload,
   DownloadButton,
+  FetchDownloadButton,
   DeleteButton,
 } from "@better-s3/ui";
 
@@ -66,11 +67,17 @@ export default function UploadPage() {
           Replace the <code>objectKey</code> below with an actual key from your
           bucket.
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <DownloadButton
             presignApi={presignApi}
             objectKey="uploads/example.jpg"
             fileName="example.jpg"
+          />
+          <FetchDownloadButton
+            presignApi={presignApi}
+            objectKey="uploads/example.jpg"
+            fileName="example.jpg"
+            label="Download (with progress)"
           />
           <DeleteButton
             presignApi={presignApi}

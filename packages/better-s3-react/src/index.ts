@@ -49,10 +49,21 @@ export {
 } from "./use-multi-upload-controls";
 export {
   useDownload,
+  type DownloadPhase,
+  type DownloadHooks,
   type UseDownloadOptions,
   type UseDownloadState,
   type UseDownloadReturn,
 } from "./use-download";
+export {
+  useFetchDownload,
+  type FetchDownloadPhase,
+  type FetchDownloadProgress,
+  type FetchDownloadHooks,
+  type UseFetchDownloadOptions,
+  type UseFetchDownloadState,
+  type UseFetchDownloadReturn,
+} from "./use-fetch-download";
 export {
   useDelete,
   type UseDeleteOptions,
