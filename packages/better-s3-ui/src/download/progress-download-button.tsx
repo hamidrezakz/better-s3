@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type FetchDownloadButtonProps = FetchDownloadHooks & {
+type ProgressDownloadButtonProps = FetchDownloadHooks & {
   presignApi: PresignApi;
   objectKey: string;
   fileName?: string;
@@ -32,7 +32,7 @@ type FetchDownloadButtonProps = FetchDownloadHooks & {
   showStatus?: boolean;
 };
 
-export function FetchDownloadButton({
+export function ProgressDownloadButton({
   presignApi,
   objectKey,
   fileName,
@@ -51,7 +51,7 @@ export function FetchDownloadButton({
   onSuccess,
   onError,
   onCancel,
-}: FetchDownloadButtonProps) {
+}: ProgressDownloadButtonProps) {
   const displayName = fileName ?? objectKey.split("/").pop() ?? objectKey;
 
   const dl = useFetchDownload({

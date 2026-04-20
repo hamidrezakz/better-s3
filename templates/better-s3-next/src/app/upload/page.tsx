@@ -6,7 +6,7 @@ import {
   Upload,
   MultiUpload,
   DownloadButton,
-  FetchDownloadButton,
+  ProgressDownloadButton,
   DeleteButton,
 } from "@better-s3/ui";
 
@@ -73,7 +73,7 @@ export default function UploadPage() {
             objectKey="uploads/example.jpg"
             fileName="example.jpg"
           />
-          <FetchDownloadButton
+          <ProgressDownloadButton
             presignApi={presignApi}
             objectKey="uploads/example.jpg"
             fileName="example.jpg"
