@@ -1,22 +1,39 @@
 # @better-s3/ui
 
-Pre-built React components for S3 file operations — upload (button & dropzone), download, and delete with confirmation. Built with [shadcn/ui](https://ui.shadcn.com) and Tailwind CSS.
+Styled React components for better-s3 flows. The package ships Mira-flavored, shadcn-style components for upload, multi-upload, download, and delete.
 
-> **Need full control?** Use [`@better-s3/react`](../better-s3-react) for headless hooks.
+Use it when you want production-ready UI fast. Keep the package if you want speed, restyle it with your own shadcn theme tokens, or build fully custom components with [`@better-s3/react`](../better-s3-react) when you want full source ownership.
+
+> These components are designed around the [shadcn](https://ui.shadcn.com) styling model. Your app should already expose shadcn-style CSS variables such as `--background`, `--foreground`, `--primary`, `--border`, and friends.
 
 ## Install
 
 ```bash
-pnpm add @better-s3/ui @better-s3/server
+pnpm add @better-s3/ui @better-s3/server @aws-sdk/client-s3
 ```
 
-**Peer deps:** `react`, `sonner`, `lucide-react`, `clsx`, `tailwind-merge`
+Peer dependencies:
+
+- `react`
+- `@base-ui/react`
+- `class-variance-authority`
+- `clsx`
+- `lucide-react`
+- `sonner`
+- `tailwind-merge`
 
 ## Setup
 
-```tsx
-import "@better-s3/ui/styles.css";
+Add the package stylesheet to your global CSS file and make sure your app already includes shadcn theme variables.
+
+```css
+@import "shadcn/tailwind.css";
+@import "@better-s3/ui/styles.css";
 ```
+
+If your project already uses shadcn with CSS variables, that is usually enough.
+
+If you prefer source-owned UI instead of consuming the package, keep the better-s3 server and hook layers and compose your own components with `@better-s3/react` plus the [shadcn CLI](https://ui.shadcn.com/docs/cli).
 
 ## Components
 
@@ -48,6 +65,12 @@ const api = createS3Api("/api/s3");
 // Delete with confirmation dialog
 <DeleteButton api={api} objectKey="report.pdf" />
 ```
+
+## When to use this package
+
+- Use `@better-s3/ui` when you want fast setup with polished defaults.
+- Use `@better-s3/react` when you want to build your own UI with your own components.
+- Mix both when you want ready-made upload flows now and custom components later.
 
 ## License
 

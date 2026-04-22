@@ -109,14 +109,14 @@ Client-side helper for calling the server endpoints (used internally by `@better
 ```ts
 import { createS3Api } from "@better-s3/server";
 
-const api = createS3Api("/api/s3");
+const s3Api = createS3Api("/api/s3");
 
-const { url } = await api.upload({
+const { url } = await s3Api.upload({
   key: "photo.jpg",
   contentType: "image/jpeg",
 });
-const { url: downloadUrl } = await api.download("photo.jpg");
-await api.delete("photo.jpg");
+const { url: downloadUrl } = await s3Api.download("photo.jpg");
+await s3Api.delete("photo.jpg");
 ```
 
 ## License

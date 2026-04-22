@@ -1,0 +1,25 @@
+{
+  "title": "better-s3",
+  "pages": [
+    "--- Getting Started ---",
+    "index",
+    "quickstart",
+    "--- Server (@better-s3/server) ---",
+    "server-overview",
+    "server-hooks",
+    "server-adapters",
+    "helpers-server",
+    "--- React Hooks (@better-s3/react) ---",
+    "hooks-upload",
+    "hooks-multi-upload",
+    "hooks-download",
+    "hooks-delete",
+    "--- UI Components (@better-s3/ui) ---",
+    "ui-upload",
+    "ui-multi-upload",
+    "ui-download",
+    "ui-delete",
+    "--- Guides ---",
+    "...guides"
+  ]
+}

@@ -1,13 +1,145 @@
 ---
-title: Hello World
-description: Your first document
+title: Introduction
+description: A customizable, AWS SDK-first layer for uploads, downloads, multipart flows, and shadcn-friendly S3 UI.
+icon: House
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+import {
+  ArrowDownToLine,
+  Boxes,
+  Cable,
+  CheckCircle2,
+  CloudUpload,
+  FolderSync,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
 
-## What is Next?
+**better-s3** is a customizable, AWS SDK-first layer for S3-powered app flows.
 
-<Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
+You still create and configure your own `S3Client`, point it at any S3-compatible provider, and keep full control over credentials, endpoints, buckets, and request behavior.
+
+better-s3 adds a **recommended layer** on top: typed server handlers, React hooks, and optional UI components for the flows most apps end up rebuilding around S3.
+
+It is **presigned first**. Your server signs requests and enforces rules, while file bytes move directly between the client and storage.
+
+Works with **AWS S3**, **Cloudflare R2**, **MinIO**, **DigitalOcean Spaces**, **Backblaze B2**, and other S3-compatible providers.
+
+### How it works
+
+1. Your app exposes typed server handlers for presign, confirm, download, delete, and multipart actions.
+2. Hooks or UI components call those handlers from the client.
+3. File bytes move directly between the browser and your S3 provider.
+4. Your app stays in sync through validation, progress state, and lifecycle hooks.
+
+## Why better-s3?
+
+- **AWS SDK first:** keep the native client, provider config, and low-level control you already know.
+- **A recommended architecture:** start from a complete flow instead of stitching S3 pieces together yourself.
+- **Built for app flows:** uploads, downloads, deletes, multipart, validation, and lifecycle hooks in one stack.
+- **Proxy-free by design:** the server signs requests without becoming a bandwidth bottleneck.
+- **shadcn-friendly UI:** the UI package follows shadcn styling and fits naturally into apps already using shadcn/ui.
+
+## Comparison
+
+| Capability | better-s3 | UploadThing | Uppy |
+| ---------- | :-------: | :---------: | :--: |
+| Bring your own `S3Client` and AWS SDK config | ✅ | ❌ | ❌ |
+| Recommended full-stack S3 architecture | ✅ | Partial | ❌ |
+| Works across S3-compatible providers | ✅ | ❌ | ✅ |
+| Upload, download, delete, and multipart in one stack | ✅ | Partial | Partial |
+| Headless React hooks for custom UI | ✅ | ❌ | ❌ |
+| UI compatible with shadcn styling | ✅ | ❌ | ❌ |
+| Server lifecycle hooks for app sync | ✅ | Limited | ❌ |
+
+## Key Features
+
+<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+  <div className="rounded-xl border bg-card p-4">
+    <div className="mb-2 flex items-center gap-2 font-medium">
+      <ShieldCheck className="size-4 text-primary" />
+      Presigned by design
+    </div>
+    <p className="text-sm text-muted-foreground">
+      Upload and download flows are signed on the server, then executed directly against storage.
+    </p>
+  </div>
+
+<div className="rounded-xl border bg-card p-4">
+  <div className="mb-2 flex items-center gap-2 font-medium">
+    <CloudUpload className="size-4 text-primary" />
+    Smart uploads
+  </div>
+  <p className="text-sm text-muted-foreground">
+    Simple uploads for small files, automatic multipart for large ones, with
+    retries and concurrency.
+  </p>
+</div>
+
+<div className="rounded-xl border bg-card p-4">
+  <div className="mb-2 flex items-center gap-2 font-medium">
+    <ArrowDownToLine className="size-4 text-primary" />
+    Download flows
+  </div>
+  <p className="text-sm text-muted-foreground">
+    Generate secure download URLs and plug them into headless hooks or
+    ready-made buttons.
+  </p>
+</div>
+
+<div className="rounded-xl border bg-card p-4">
+  <div className="mb-2 flex items-center gap-2 font-medium">
+    <Trash2 className="size-4 text-primary" />
+    Safe deletes
+  </div>
+  <p className="text-sm text-muted-foreground">
+    Add delete flows with confirmation, server guards, and cleanup hooks for
+    application data.
+  </p>
+</div>
+
+<div className="rounded-xl border bg-card p-4">
+  <div className="mb-2 flex items-center gap-2 font-medium">
+    <FolderSync className="size-4 text-primary" />
+    Lifecycle hooks
+  </div>
+  <p className="text-sm text-muted-foreground">
+    Run auth checks, persist metadata, notify your app, or sync your database
+    after each operation.
+  </p>
+</div>
+
+<div className="rounded-xl border bg-card p-4">
+  <div className="mb-2 flex items-center gap-2 font-medium">
+    <Boxes className="size-4 text-primary" />
+    Three integration layers
+  </div>
+  <p className="text-sm text-muted-foreground">
+    Start with server handlers, add headless hooks, or ship faster with styled
+    UI components.
+  </p>
+</div>
+
+<div className="rounded-xl border bg-card p-4">
+  <div className="mb-2 flex items-center gap-2 font-medium">
+    <Cable className="size-4 text-primary" />
+    Works with your provider
+  </div>
+  <p className="text-sm text-muted-foreground">
+    Stay on the AWS SDK v3 path and point it at S3, R2, MinIO, Spaces, or
+    another compatible endpoint.
+  </p>
+</div>
+
+  <div className="rounded-xl border bg-card p-4">
+    <div className="mb-2 flex items-center gap-2 font-medium">
+      <CheckCircle2 className="size-4 text-primary" />
+      Styled or custom UI
+    </div>
+    <p className="text-sm text-muted-foreground">
+      Use the UI package for shadcn-style defaults, or build your own components on top of the hooks.
+    </p>
+  </div>
+</div>
+
+Ready? Head to the [Quickstart](/docs/quickstart) guide.

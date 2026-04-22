@@ -1,0 +1,338 @@
+---
+title: Quickstart
+description: Get better-s3 running in your Next.js project in under five minutes.
+icon: Rocket
+---
+
+<Steps>
+
+<Step>
+
+### Install packages
+
+```bash
+pnpm add @better-s3/server @better-s3/react @aws-sdk/client-s3
+```
+
+For styled UI components, also install `@better-s3/ui` and `shadcn`:
+
+```bash
+pnpm add @better-s3/ui shadcn
+```
+
+</Step>
+
+<Step>
+
+### Add global styles for `@better-s3/ui`
+
+If you use `@better-s3/ui`, add the package stylesheet to your global CSS file.
+
+```css title="src/app/global.css"
+@import "shadcn/tailwind.css";
+@import "@better-s3/ui/styles.css";
+```
+
+The UI package follows the [shadcn](https://ui.shadcn.com) styling model, so your app should expose shadcn-style theme variables in `global.css`. See the [styling docs](https://ui.shadcn.com/docs/styling).
+
+<Callout type="info">
+  This is the recommended path for quick setup. If you want full source
+  ownership later, you can build custom UI with `@better-s3/react`, or manage
+  the same patterns manually with [shadcn UI](https://ui.shadcn.com) and the
+  [shadcn CLI](https://ui.shadcn.com/docs/cli).
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the S3 client
+
+Create your shared S3 client file and environment variables for your provider.
+
+<Tabs items={["AWS S3", "Cloudflare R2", "MinIO", "DigitalOcean Spaces"]}>
+
+<Tab value="AWS S3">
+
+```ts title="lib/s3.ts"
+import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Api } from "@better-s3/server";
+
+export const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+export const defaultBucket = process.env.AWS_S3_BUCKET!;
+
+export const s3Api = createS3Api("/api/s3");
+```
+
+```bash title=".env.local"
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_S3_BUCKET=your_bucket_name
+```
+
+</Tab>
+
+<Tab value="Cloudflare R2">
+
+```ts title="lib/s3.ts"
+import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Api } from "@better-s3/server";
+
+export const s3 = new S3Client({
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT!,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
+
+export const defaultBucket = process.env.R2_DEFAULT_BUCKET_NAME!;
+
+export const s3Api = createS3Api("/api/s3");
+```
+
+```bash title=".env.local"
+R2_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=your_access_key
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_DEFAULT_BUCKET_NAME=your_bucket_name
+```
+
+</Tab>
+
+<Tab value="MinIO">
+
+```ts title="lib/s3.ts"
+import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Api } from "@better-s3/server";
+
+export const s3 = new S3Client({
+  region: "us-east-1",
+  endpoint: process.env.MINIO_ENDPOINT!,
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: process.env.MINIO_ACCESS_KEY!,
+    secretAccessKey: process.env.MINIO_SECRET_KEY!,
+  },
+});
+
+export const defaultBucket = process.env.MINIO_BUCKET!;
+
+export const s3Api = createS3Api("/api/s3");
+```
+
+```bash title=".env.local"
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=uploads
+```
+
+</Tab>
+
+<Tab value="DigitalOcean Spaces">
+
+```ts title="lib/s3.ts"
+import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Api } from "@better-s3/server";
+
+export const s3 = new S3Client({
+  region: process.env.SPACES_REGION!,
+  endpoint: process.env.SPACES_ENDPOINT!,
+  credentials: {
+    accessKeyId: process.env.SPACES_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY!,
+  },
+});
+
+export const defaultBucket = process.env.SPACES_BUCKET!;
+
+export const s3Api = createS3Api("/api/s3");
+```
+
+```bash title=".env.local"
+SPACES_REGION=nyc3
+SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
+SPACES_ACCESS_KEY_ID=your_access_key
+SPACES_SECRET_ACCESS_KEY=your_secret_key
+SPACES_BUCKET=your_bucket_name
+```
+
+</Tab>
+
+</Tabs>
+
+<Callout type="info">
+  The client API stays the same across providers. Only the `S3Client`
+  configuration and environment variables change.
+</Callout>
+
+See the [AWS SDK for JavaScript v3 S3 Client docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/) for provider-specific configuration details.
+
+</Step>
+
+<Step>
+
+### Create the route handler
+
+better-s3 ships first-class adapters for React-based frameworks. Pick yours:
+
+<Tabs items={["Next.js", "Remix", "Hono", "Express"]}>
+
+<Tab value="Next.js">
+
+Create a catch-all App Router route. One file handles presigning, multipart, deletes, and confirmation.
+
+```ts title="app/api/s3/[...s3]/route.ts"
+import { createRouteHandler } from "@better-s3/server/next";
+import { s3, defaultBucket } from "@/lib/s3";
+
+const handler = createRouteHandler({
+  s3,
+  defaultBucket,
+  basePath: "/api/s3",
+  hooks: {
+    // guard: async ({ request }) => { /* throw to reject */ },
+    upload: {
+      onComplete: async ({ key, contentType, contentLength }) => {
+        // await db.file.create({ data: { key, contentType, contentLength } });
+      },
+    },
+    delete: {
+      onSuccess: async ({ key }) => {
+        // await db.file.delete({ where: { key } });
+      },
+    },
+  },
+});
+
+export { handler as GET, handler as POST, handler as DELETE };
+```
+
+</Tab>
+
+<Tab value="Remix">
+
+<Callout type="info">
+  A dedicated Remix adapter is coming. In the meantime, use `createHandlers()`
+  from `@better-s3/server` to wire handlers into any Remix resource route.
+</Callout>
+
+</Tab>
+
+<Tab value="Hono">
+
+<Callout type="info">
+  A dedicated Hono adapter is coming. In the meantime, use `createHandlers()`
+  from `@better-s3/server` to wire handlers into any Hono route.
+</Callout>
+
+</Tab>
+
+<Tab value="Express">
+
+<Callout type="info">
+  A dedicated Express adapter is coming. In the meantime, use `createHandlers()`
+  from `@better-s3/server` to wire handlers into any Express route.
+</Callout>
+
+</Tab>
+
+</Tabs>
+
+The registered endpoint serves:
+
+| Method   | Path                             | Purpose                |
+| -------- | -------------------------------- | ---------------------- |
+| `POST`   | `/api/s3/presign/upload`         | Presigned upload URL   |
+| `POST`   | `/api/s3/presign/upload/confirm` | Confirm upload         |
+| `GET`    | `/api/s3/presign/download`       | Presigned download URL |
+| `DELETE` | `/api/s3/delete`                 | Delete object          |
+| `POST`   | `/api/s3/presign/multipart/*`    | Multipart operations   |
+
+</Step>
+
+<Step>
+
+### Add upload to your UI
+
+<Tabs items={["Pre-built UI", "Headless Hook"]}>
+
+<Tab value="Pre-built UI">
+
+Use the package when you want styled components that already match the shadcn model.
+
+```tsx title="app/upload/page.tsx"
+"use client";
+
+import { s3Api } from "@/lib/s3";
+import { Upload } from "@better-s3/ui";
+
+export default function UploadPage() {
+  return (
+    <Upload
+      api={s3Api}
+      objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
+      variant="dropzone"
+      accept={["image/*", ".pdf"]}
+      maxFileSize={10 * 1024 * 1024}
+      onSuccess={({ key }) => console.log("Uploaded:", key)}
+    />
+  );
+}
+```
+
+Swap `Upload` with `MultiUpload` and add `maxFiles` for batch uploads.
+
+</Tab>
+
+<Tab value="Headless Hook">
+
+Use the hook layer when you want the behavior but prefer to build the UI yourself.
+
+```tsx title="app/upload/page.tsx"
+"use client";
+
+import { s3Api } from "@/lib/s3";
+import { useUploadControls } from "@better-s3/react";
+
+export default function UploadPage() {
+  const { state, openFilePicker, getRootProps } = useUploadControls({
+    api: s3Api,
+    objectKey: (file) => `uploads/${Date.now()}-${file.name}`,
+    accept: ["image/*", ".pdf"],
+    maxFileSize: 10 * 1024 * 1024,
+    onSuccess: ({ key }) => console.log("Uploaded:", key),
+  });
+
+  return (
+    <div {...getRootProps()} className="border-2 border-dashed p-8 rounded-lg">
+      <button onClick={openFilePicker} disabled={state.phase !== "idle"}>
+        {state.phase === "idle" ? "Choose file" : "Uploading…"}
+      </button>
+      {state.phase === "uploading" && (
+        <progress value={state.progress.percent} max={100} />
+      )}
+      {state.phase === "error" && <p>{state.error}</p>}
+      {state.phase === "success" && <p>Stored at: {state.result?.key}</p>}
+    </div>
+  );
+}
+```
+
+</Tab>
+
+</Tabs>
+
+</Step>
+
+</Steps>
