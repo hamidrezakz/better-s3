@@ -1,22 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# uppy-aws-next
 
-## Getting Started
+A Next.js 16 template demonstrating S3 file operations using **Uppy v5** for the upload UI and **@better-s3/server** for the server-side presigned URL API.
 
-First, run the development server:
+## What this template shows
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Feature                     | Implementation                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| Upload (simple + multipart) | Uppy Dashboard / Uppy Dropzone → `@uppy/aws-s3` → `@better-s3/server` presigned URLs |
+| Download                    | Custom `DownloadButton` → `@better-s3/server` presigned URL → browser download       |
+| Delete                      | Custom `DeleteButton` with inline confirm → `@better-s3/server`                      |
+
+## Key files
+
+```
+src/
+  app/
+    api/s3/[...s3]/route.ts  ← all S3 API routes (from @better-s3/server)
+    upload/page.tsx           ← Uppy Dashboard + Dropzone demos
+    manage/page.tsx           ← Download + Delete demo
+  lib/
+    s3.server.ts              ← S3Client (server-only)
+    s3.ts                     ← s3Api client (browser-safe)
+    uppy-s3.ts                ← createUppyS3() factory
+  components/
+    uppy-dashboard.tsx        ← Uppy Dashboard wrapper (use client)
+    uppy-drag-drop.tsx        ← Uppy Dropzone + StatusBar (use client)
+    download-button.tsx       ← Custom download button
+    delete-button.tsx         ← Custom delete + confirmation
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Copy `.env.example` → `.env.local` and fill in your S3/R2 credentials.
+2. Install deps: `pnpm install`
+3. Run dev: `pnpm dev`
+
+## Notes
+
+- Files **≥ 50 MB** automatically use multipart upload via `@uppy/aws-s3`.
+- Download and delete are custom components — Uppy has no built-in support for these.
+- The server layer is `@better-s3/server` (same as the `better-s3-next` template). You can replace it with raw Next.js route handlers if you prefer.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

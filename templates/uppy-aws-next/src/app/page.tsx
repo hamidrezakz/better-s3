@@ -4,9 +4,9 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 p-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">better-s3</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Uppy + AWS S3</h1>
         <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-          File upload, download &amp; delete with S3 presigned URLs
+          File upload, download &amp; delete — Uppy UI · @better-s3/server API
         </p>
       </div>
 
@@ -14,13 +14,9 @@ export default function Home() {
         <NavLink
           href="/upload"
           title="Upload"
-          desc="Single & multi file upload"
+          desc="Uppy Dashboard & DragDrop"
         />
-        <NavLink
-          href="/headless"
-          title="Headless Hooks"
-          desc="useUpload, useDownload, useDelete"
-        />
+        <NavLink href="/manage" title="Manage" desc="Download & delete files" />
       </nav>
 
       <p className="text-xs text-zinc-400 dark:text-zinc-600">

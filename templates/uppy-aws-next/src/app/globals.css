@@ -1,7 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@better-s3/ui/styles.css";
+
+/* Uppy component styles */
+@import "@uppy/core/css/style.min.css";
+@import "@uppy/dashboard/css/style.min.css";
+@import "@uppy/status-bar/css/style.min.css";
+@import "@uppy/react/css/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
