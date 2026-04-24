@@ -62,21 +62,19 @@ export function UploadStatus({
 
   if (phase === "error") {
     return (
-      <div className="flex flex-col gap-1 text-xs">
-        <div className="flex items-center gap-1.5">
-          <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
+      <div className="flex min-w-0 items-start gap-1.5 text-xs">
+        <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+        <p className="min-w-0 break-words text-destructive">
           {fileInfo && (
             <>
-              <span className="max-w-32 min-w-16 truncate sm:max-w-48">
+              <span className="inline-block max-w-[20ch] truncate align-bottom">
                 {fileInfo.name}
               </span>
-              <span className="shrink-0 text-muted-foreground">
-                {formatFileSize(fileInfo.size)}
-              </span>
+              {": "}
             </>
           )}
-        </div>
-        <span className="text-destructive">{error ?? "Upload failed"}</span>
+          {error ?? "Upload failed"}
+        </p>
       </div>
     );
   }

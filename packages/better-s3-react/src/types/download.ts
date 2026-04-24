@@ -3,7 +3,12 @@
 // - useFetchDownload → ./use-fetch-download.ts
 //
 // Re-export for convenience.
-export type { DownloadPhase, DownloadHooks } from "../use-download";
+export type {
+  DownloadPhase,
+  DownloadHooks,
+  UseDownloadState,
+  UseDownloadReturn,
+} from "../use-download";
 
 export type {
   FetchDownloadPhase,

@@ -1,6 +1,11 @@
 "use client";
 
-import { Trash2Icon, LoaderIcon, AlertCircleIcon } from "lucide-react";
+import {
+  Trash2Icon,
+  LoaderIcon,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@better-s3/react";
@@ -152,15 +157,25 @@ export function DeleteButton({
         </AlertDialog>
       </div>
 
+      {showStatus && del.phase === "success" && (
+        <div className="flex min-w-0 items-center gap-1.5 text-xs">
+          <CheckCircle2Icon className="size-3.5 shrink-0 text-green-600" />
+          <p className="min-w-0 break-words text-green-600">
+            &ldquo;
+            <span className="inline-block max-w-[14ch] truncate align-bottom">
+              {displayName}
+            </span>
+            &rdquo; deleted
+          </p>
+        </div>
+      )}
+
       {showStatus && del.phase === "error" && (
-        <div className="flex flex-col gap-1 text-xs">
-          <div className="flex items-center gap-1.5">
-            <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
-            <span className="max-w-32 truncate sm:max-w-48">{displayName}</span>
-          </div>
-          <span className="text-destructive">
+        <div className="flex min-w-0 items-start gap-1.5 text-xs">
+          <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+          <p className="min-w-0 break-words text-destructive">
             {del.error ?? "Delete failed"}
-          </span>
+          </p>
         </div>
       )}
     </div>

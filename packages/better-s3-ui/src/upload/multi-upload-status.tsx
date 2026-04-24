@@ -118,7 +118,7 @@ function FileList({ files }: { files: MultiUploadFileState[] }) {
             )}
           </div>
           {f.status === "error" && f.error && (
-            <span className="pl-5 text-destructive">{f.error}</span>
+            <span className="truncate pl-5 text-destructive">{f.error}</span>
           )}
         </li>
       ))}

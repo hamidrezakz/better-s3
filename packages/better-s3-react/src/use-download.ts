@@ -22,16 +22,27 @@ export type UseDownloadOptions = DownloadHooks & {
 export type UseDownloadState = {
   phase: DownloadPhase;
   error: string | null;
+  /** Presigned URL — set after a successful presign, cleared on reset */
+  url: string | null;
+  /** Validity window in seconds for the presigned URL */
+  expiresIn: number | null;
 };
 
 export type UseDownloadReturn = UseDownloadState & {
   download: (key: string, downloadName?: string) => Promise<void>;
+  /** Fetch the presigned URL without triggering a browser download — for headless use */
+  presign: (
+    key: string,
+    downloadName?: string,
+  ) => Promise<{ url: string; expiresIn: number } | null>;
   reset: () => void;
 };
 
 const INITIAL_STATE: UseDownloadState = {
   phase: "idle",
   error: null,
+  url: null,
+  expiresIn: null,
 };
 
 export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
@@ -39,49 +50,61 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  const download = useCallback(async (key: string, downloadName?: string) => {
+  const presign = useCallback(async (key: string, downloadName?: string) => {
     const opts = optionsRef.current;
-
-    if (opts.beforeDownload) {
-      const allowed = await opts.beforeDownload(key);
-      if (!allowed) {
-        setState({
-          phase: "error",
-          error: "Download blocked by beforeDownload hook",
-        });
-        opts.onError?.(key, new Error("blocked"));
-        return;
-      }
-    }
-
-    setState({ phase: "presigning", error: null });
-
+    setState({ phase: "presigning", error: null, url: null, expiresIn: null });
     try {
-      const { url } = await opts.api.download(key, {
+      const result = await opts.api.download(key, {
         fileName: downloadName,
         bucket: opts.bucket,
       });
-
-      // Native browser download — no fetch, no RAM usage.
-      // S3 uses the Content-Disposition stored at upload time for the filename.
-      // Pass downloadName only if the caller explicitly wants to override it.
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      if (downloadName) anchor.download = downloadName;
-      anchor.click();
-
-      setState(INITIAL_STATE);
-      opts.onInitiated?.(key);
+      setState({
+        phase: "idle",
+        error: null,
+        url: result.url,
+        expiresIn: result.expiresIn,
+      });
+      return { url: result.url, expiresIn: result.expiresIn };
     } catch (err) {
       const message = err instanceof Error ? err.message : "Download failed";
-      setState({ phase: "error", error: message });
+      setState({ phase: "error", error: message, url: null, expiresIn: null });
       opts.onError?.(key, err);
+      return null;
     }
   }, []);
+
+  const download = useCallback(
+    async (key: string, downloadName?: string) => {
+      const opts = optionsRef.current;
+
+      if (opts.beforeDownload) {
+        const allowed = await opts.beforeDownload(key);
+        if (!allowed) {
+          setState({
+            phase: "error",
+            error: "Download blocked by beforeDownload hook",
+            url: null,
+            expiresIn: null,
+          });
+          opts.onError?.(key, new Error("blocked"));
+          return;
+        }
+      }
+
+      const result = await presign(key, downloadName);
+      if (!result) return; // presign already set error state
+
+      // Native browser download via location — server sets Content-Disposition: attachment.
+      window.location.href = result.url;
+
+      opts.onInitiated?.(key);
+    },
+    [presign],
+  );
 
   const reset = useCallback(() => {
     setState(INITIAL_STATE);
   }, []);
 
-  return { ...state, download, reset };
+  return { ...state, download, presign, reset };
 }

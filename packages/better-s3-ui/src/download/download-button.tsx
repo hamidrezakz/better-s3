@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadIcon, LoaderIcon } from "lucide-react";
+import { AlertCircleIcon, DownloadIcon, LoaderIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { S3Api } from "@better-s3/react";
@@ -16,6 +16,8 @@ type DownloadButtonProps = {
   disabled?: boolean;
   /** Enable sonner toasts (default: `true`) */
   toast?: boolean;
+  /** Show inline error status below the button (default: `true`) */
+  showStatus?: boolean;
 };
 
 export function DownloadButton({
@@ -26,6 +28,7 @@ export function DownloadButton({
   className,
   disabled,
   toast: enableToast = true,
+  showStatus = true,
 }: DownloadButtonProps) {
   const dl = useDownload({
     api,
@@ -60,10 +63,13 @@ export function DownloadButton({
         </span>
       </Button>
 
-      {dl.phase === "error" && (
-        <span className="text-xs text-destructive">
-          {dl.error ?? "Download failed"}
-        </span>
+      {showStatus && dl.phase === "error" && (
+        <div className="flex min-w-0 items-start gap-1.5 text-xs">
+          <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+          <p className="min-w-0 break-words text-destructive">
+            {dl.error ?? "Download failed"}
+          </p>
+        </div>
       )}
     </div>
   );

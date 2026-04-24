@@ -134,16 +134,11 @@ export function ProgressDownloadButton({
       </TooltipProvider>
 
       {showStatus && dl.phase === "error" && (
-        <div className="flex flex-col gap-1 text-xs">
-          <div className="flex items-center gap-1.5">
-            <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
-            <span className="max-w-32 min-w-16 truncate sm:max-w-48">
-              {dl.fileName ?? displayName}
-            </span>
-          </div>
-          <span className="text-destructive">
+        <div className="flex min-w-0 items-start gap-1.5 text-xs">
+          <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+          <p className="min-w-0 break-words text-destructive">
             {dl.error ?? "Download failed"}
-          </span>
+          </p>
         </div>
       )}
     </div>

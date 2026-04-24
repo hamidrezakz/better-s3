@@ -1,4 +1,4 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { S3HandlerConfig } from "../../types";
 import { normalizeExpiresIn, runHook, withS3ErrorHandler } from "../../helpers";
@@ -26,14 +26,24 @@ export function createDownloadHandler(config: S3HandlerConfig) {
     });
     if (guardResult) return guardResult;
 
+    try {
+      await config.s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+    } catch (err: unknown) {
+      const name = (err as { name?: string })?.name;
+      if (name === "NoSuchKey" || name === "NotFound") {
+        return Response.json({ message: "Object not found" }, { status: 404 });
+      }
+      throw err;
+    }
+
     const url = await getSignedUrl(
       config.s3,
       new GetObjectCommand({
         Bucket: bucket,
         Key: key,
-        ...(fileName
-          ? { ResponseContentDisposition: `attachment; filename="${fileName}"` }
-          : {}),
+        ResponseContentDisposition: fileName
+          ? `attachment; filename="${fileName}"`
+          : "attachment",
       }),
       { expiresIn },
     );
