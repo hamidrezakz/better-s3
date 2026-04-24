@@ -11,7 +11,7 @@ const handler = createRouteHandler({
     upload: true,
     download: true,
     delete: true,
-    // multipart: true, // enable only if you explicitly need multipart uploads
+    multipart: true,
   },
 
   // Optional: enforce a server-side file size limit.
