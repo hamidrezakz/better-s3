@@ -2,13 +2,14 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { S3Api } from "@better-s3/server";
-import { parseContentDispositionFilename } from "./helpers";
 
-export type DownloadPhase = "idle" | "downloading" | "success" | "error";
+/** "presigning" = fetching the presigned URL from the server; download itself is native */
+export type DownloadPhase = "idle" | "presigning" | "error";
 
 export type DownloadHooks = {
   beforeDownload?: (key: string) => Promise<boolean> | boolean;
-  onSuccess?: (key: string) => Promise<void> | void;
+  /** Fires as soon as the browser has been handed the URL — not when download completes. */
+  onInitiated?: (key: string) => void;
   onError?: (key: string, error: unknown) => void;
 };
 
@@ -21,7 +22,6 @@ export type UseDownloadOptions = DownloadHooks & {
 export type UseDownloadState = {
   phase: DownloadPhase;
   error: string | null;
-  fileName: string | null;
 };
 
 export type UseDownloadReturn = UseDownloadState & {
@@ -32,7 +32,6 @@ export type UseDownloadReturn = UseDownloadState & {
 const INITIAL_STATE: UseDownloadState = {
   phase: "idle",
   error: null,
-  fileName: null,
 };
 
 export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
@@ -41,7 +40,6 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
   optionsRef.current = options;
 
   const download = useCallback(async (key: string, downloadName?: string) => {
-    const fallback = key.split("/").pop() ?? key;
     const opts = optionsRef.current;
 
     if (opts.beforeDownload) {
@@ -50,18 +48,13 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
         setState({
           phase: "error",
           error: "Download blocked by beforeDownload hook",
-          fileName: downloadName ?? null,
         });
         opts.onError?.(key, new Error("blocked"));
         return;
       }
     }
 
-    setState({
-      phase: "downloading",
-      error: null,
-      fileName: downloadName ?? null,
-    });
+    setState({ phase: "presigning", error: null });
 
     try {
       const { url } = await opts.api.download(key, {
@@ -69,42 +62,19 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
         bucket: opts.bucket,
       });
 
-      // Fetch as blob so the download attribute works correctly
-      // (cross-origin presigned URLs ignore anchor.download).
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(
-          res.status === 404
-            ? "File not found"
-            : `Download failed (${res.status})`,
-        );
-      }
-
-      const name =
-        downloadName ??
-        parseContentDispositionFilename(
-          res.headers.get("content-disposition"),
-          fallback,
-        );
-
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      // Native browser download — no fetch, no RAM usage.
+      // S3 uses the Content-Disposition stored at upload time for the filename.
+      // Pass downloadName only if the caller explicitly wants to override it.
       const anchor = document.createElement("a");
-      anchor.href = blobUrl;
-      anchor.download = name;
+      anchor.href = url;
+      if (downloadName) anchor.download = downloadName;
       anchor.click();
-      URL.revokeObjectURL(blobUrl);
 
-      setState({ phase: "success", error: null, fileName: name });
-      await opts.onSuccess?.(key);
       setState(INITIAL_STATE);
+      opts.onInitiated?.(key);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Download failed";
-      setState({
-        phase: "error",
-        error: message,
-        fileName: downloadName ?? null,
-      });
+      setState({ phase: "error", error: message });
       opts.onError?.(key, err);
     }
   }, []);

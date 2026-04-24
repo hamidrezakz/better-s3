@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadIcon, AlertCircleIcon, LoaderIcon } from "lucide-react";
+import { DownloadIcon, LoaderIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { S3Api } from "@better-s3/react";
@@ -27,13 +27,10 @@ export function DownloadButton({
   disabled,
   toast: enableToast = true,
 }: DownloadButtonProps) {
-  const displayName = fileName ?? objectKey.split("/").pop() ?? objectKey;
-
   const dl = useDownload({
     api,
-    onSuccess: () => {
-      if (enableToast)
-        toast.success("Download complete", { description: displayName });
+    onInitiated: () => {
+      if (enableToast) toast.success("Download started");
     },
     onError: (_key, error) => {
       if (enableToast) {
@@ -44,17 +41,17 @@ export function DownloadButton({
     },
   });
 
-  const isLoading = dl.phase === "downloading";
+  const isPending = dl.phase === "presigning";
 
   return (
     <div className={cn("inline-flex flex-col gap-1.5", className)}>
       <Button
         size="default"
         variant="outline"
-        disabled={disabled || isLoading}
-        onClick={() => dl.download(objectKey, displayName)}>
+        disabled={disabled || isPending}
+        onClick={() => dl.download(objectKey, fileName)}>
         <span className="inline-flex items-center gap-1">
-          {isLoading ? (
+          {isPending ? (
             <LoaderIcon className="animate-spin" data-icon="inline-start" />
           ) : (
             <DownloadIcon data-icon="inline-start" />

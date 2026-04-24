@@ -21,7 +21,7 @@ export type FetchDownloadHooks = {
   beforeDownload?: (key: string) => Promise<boolean> | boolean;
   onDownloadStart?: (key: string) => void;
   onProgress?: (key: string, progress: FetchDownloadProgress) => void;
-  onSuccess?: (key: string) => Promise<void> | void;
+  onSuccess?: (key: string, fileName: string) => Promise<void> | void;
   onError?: (key: string, error: unknown, phase: FetchDownloadPhase) => void;
   onCancel?: (key: string) => void;
 };
@@ -163,7 +163,7 @@ export function useFetchDownload(
         fileSize: blob.size,
         progress: { loaded: blob.size, total: blob.size, percent: 100 },
       }));
-      await opts.onSuccess?.(key);
+      await opts.onSuccess?.(key, name ?? fallback);
     } catch (err) {
       if ((err as Error).name === "AbortError") {
         opts.onCancel?.(key);

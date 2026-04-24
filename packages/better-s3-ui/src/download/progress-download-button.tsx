@@ -60,14 +60,14 @@ export function ProgressDownloadButton({
     beforeDownload,
     onDownloadStart,
     onProgress,
-    onSuccess: (key) => {
+    onSuccess: (key, actualFileName) => {
       if (enableToast) {
         toast.dismiss(`dl-${objectKey}`);
         toast.success("Download complete", {
-          description: `${displayName}${fileSize != null ? ` · ${formatFileSize(fileSize)}` : ""}`,
+          description: `${actualFileName}${fileSize != null ? ` · ${formatFileSize(fileSize)}` : ""}`,
         });
       }
-      onSuccess?.(key);
+      onSuccess?.(key, actualFileName);
     },
     onError: (key, error, phase) => {
       if (enableToast) {
@@ -94,7 +94,7 @@ export function ProgressDownloadButton({
       dl.cancel();
       return;
     }
-    dl.download(objectKey, displayName);
+    dl.download(objectKey, fileName);
   };
 
   return (
