@@ -25,23 +25,34 @@ const api = createS3Api("/api/s3");
 ```tsx
 const { phase, progress, error, upload, cancel, reset } = useUpload({
   api,
-  accept: ["image/*"],
-  maxFileSize: 10 * 1024 * 1024,
+  accept: ["image/*", ".pdf"],
+  maxFileSize: 10 * 1024 * 1024, // client-side pre-validation (UX)
   onSuccess: (_file, result) => console.log("Uploaded:", result.key),
+  onError: (_file, error) => {
+    // error.message for size violations:
+    //   Simple:    S3 returns 403 — "Upload failed: 403 Forbidden"
+    //   Multipart: server returns 422 — "File size (X bytes) exceeds …"
+  },
 });
 
 await upload(file, `uploads/${file.name}`, { metadata: { source: "web" } });
 ```
 
-**Phases:** `idle → validating → presigning → uploading → finalizing → success | error`
+**Phases:** `idle → validating → uploading → success | error`
+
+> `maxFileSize` performs a client-side check before the upload starts (good UX). The real enforcement is server-side:
+>
+> - **Simple uploads** — S3 enforces exact file size via a signed `content-length-range` policy. The client cannot upload a different-sized file with that URL.
+> - **Multipart uploads** — Server verifies via `HeadObject` after `CompleteMultipartUpload` and deletes the object if the limit is exceeded.
 
 ### `useUploadControls` — Upload with file picker & drag-drop
 
 ```tsx
-const { phase, progress, openFilePicker, inputProps, dropHandlers } =
+const { mode, phase, progress, openFilePicker, inputProps, dropHandlers } =
   useUploadControls({
     api,
     objectKey: (file) => `uploads/${file.name}`,
+    maxFiles: 5, // > 1 → switches to multi-upload mode automatically
   });
 ```
 
@@ -57,17 +68,10 @@ const { phase, files, totalProgress, upload, cancel } = useMultiUpload({
 await upload(selectedFiles, (file) => `uploads/${file.name}`);
 ```
 
-### `useMultiUploadControls` — Batch upload with file picker
-
-Same as `useUploadControls` but for multiple files.
-
 ### `useDownload` — File download
 
 ```tsx
-const { phase, error, download, reset } = useDownload({
-  api,
-});
-
+const { phase, error, download, reset } = useDownload({ api });
 download("uploads/photo.jpg", "photo.jpg");
 ```
 
@@ -80,6 +84,13 @@ const { phase, pendingKey, requestDelete, confirmDelete, cancelDelete } =
 requestDelete("uploads/photo.jpg"); // phase → "confirming"
 confirmDelete(); // phase → "deleting" → "success"
 ```
+
+## Upload modes
+
+| Mode      | When used                                        | Size enforcement                                          |
+| --------- | ------------------------------------------------ | --------------------------------------------------------- |
+| Simple    | `file.size < multipartThreshold` (default 50 MB) | S3 presigned POST policy — exact `content-length-range`   |
+| Multipart | `multipart: true` or file ≥ threshold            | Server `HeadObject` check after `CompleteMultipartUpload` |
 
 ## License
 

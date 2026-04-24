@@ -1,4 +1,4 @@
-import { CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
+import { CompleteMultipartUploadCommand, HeadObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import type { S3HandlerConfig } from "../../types";
 import {
   parseBody,
@@ -59,7 +59,7 @@ export function createMultipartCompleteHandler(config: S3HandlerConfig) {
     });
     if (guardResult) return guardResult;
 
-    const { Location, ETag } = await config.s3.send(
+    await config.s3.send(
       new CompleteMultipartUploadCommand({
         Bucket: bucket,
         Key: key,
@@ -68,19 +68,40 @@ export function createMultipartCompleteHandler(config: S3HandlerConfig) {
       }),
     );
 
+    // Verify the actual uploaded object metadata via HeadObject.
+    // This is the server's only opportunity to enforce maxFileSize for
+    // multipart uploads, since individual parts bypass size checks.
+    const head = await config.s3.send(
+      new HeadObjectCommand({ Bucket: bucket, Key: key }),
+    );
+    const contentLength = head.ContentLength ?? 0;
+    const contentType = head.ContentType;
+    const eTag = head.ETag?.replace(/"/g, "");
+
+    if (config.maxFileSize && contentLength > config.maxFileSize) {
+      // Delete the object and reject the request. The client has uploaded
+      // more data than the server policy allows.
+      await config.s3
+        .send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
+        .catch(() => {});
+      return Response.json(
+        {
+          message: `File size (${contentLength} bytes) exceeds the maximum allowed size of ${config.maxFileSize} bytes`,
+        },
+        { status: 422 },
+      );
+    }
+
     await config.hooks?.multipart?.onComplete?.({
       request,
       key,
       bucket,
       uploadId,
+      contentLength,
+      contentType,
+      eTag,
     });
 
-    return Response.json({
-      bucket,
-      key,
-      uploadId,
-      location: Location,
-      eTag: ETag,
-    });
+    return Response.json({ bucket, key, uploadId, contentLength, contentType, eTag });
   });
 }

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { s3Api as api } from "@/lib/s3";
 import {
-  Upload,
-  MultiUpload,
+  UploadButton,
+  UploadDropzone,
   DownloadButton,
   ProgressDownloadButton,
   DeleteButton,
@@ -26,10 +26,9 @@ export default function UploadPage() {
       {/* ── Single Upload ──────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Single Upload (dropzone)</h2>
-        <Upload
+        <UploadDropzone
           api={api}
-          objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
-          variant="dropzone"
+          objectKey={(file: File) => `uploads/${Date.now()}-${file.name}`}
           accept={["image/*", ".pdf"]}
           maxFileSize={10 * 1024 * 1024} // 10 MB
         />
@@ -37,10 +36,9 @@ export default function UploadPage() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Single Upload (button)</h2>
-        <Upload
+        <UploadButton
           api={api}
-          objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
-          variant="button"
+          objectKey={(file: File) => `uploads/${Date.now()}-${file.name}`}
           accept={["image/*"]}
         />
       </section>
@@ -48,11 +46,10 @@ export default function UploadPage() {
       {/* ── Multi Upload ───────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Multi Upload</h2>
-        <MultiUpload
+        <UploadDropzone
           api={api}
-          objectKey={(file) => `uploads/${Date.now()}-${file.name}`}
+          objectKey={(file: File) => `uploads/${Date.now()}-${file.name}`}
           maxFiles={5}
-          variant="dropzone"
           accept={["image/*"]}
         />
       </section>

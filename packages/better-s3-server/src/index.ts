@@ -15,6 +15,7 @@ export {
   createS3Api,
   type S3Api,
   type PresignResponse,
+  type PresignedPostResponse,
   type MultipartInitResponse,
   type MultipartPartResponse,
   type UploadConfirmResponse,

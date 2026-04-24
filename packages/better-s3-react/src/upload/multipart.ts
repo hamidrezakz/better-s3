@@ -13,11 +13,12 @@ export async function uploadMultipart(
   onProgress?: (progress: UploadProgress) => void,
   signal?: AbortSignal,
   requestOptions?: UploadRequestOptions,
-): Promise<void> {
+): Promise<string | undefined> {
   const contentType = requestOptions?.contentType ?? file.type;
   const { uploadId, key } = await api.multipart.init({
     key: objectKey,
     contentType,
+    fileSize: file.size,
     metadata: requestOptions?.metadata,
     bucket: requestOptions?.bucket,
     acl: requestOptions?.acl,
@@ -94,13 +95,14 @@ export async function uploadMultipart(
 
     parts.sort((a, b) => a.partNumber - b.partNumber);
 
-    await api.multipart.complete({
+    const result = await api.multipart.complete({
       key,
       uploadId,
       parts,
       bucket: requestOptions?.bucket,
     });
     onProgress?.({ loaded: file.size, total: file.size, percent: 100 });
+    return result.eTag;
   } catch (err) {
     api.multipart
       .abort({ key, uploadId, bucket: requestOptions?.bucket })

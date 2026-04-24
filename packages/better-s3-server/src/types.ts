@@ -10,6 +10,8 @@ export type UploadHookContext = HookContext & {
   key: string;
   bucket: string;
   contentType?: string;
+  /** Declared byte size of the file the client intends to upload. */
+  fileSize?: number;
   metadata?: Record<string, string>;
   acl?: "private" | "public-read";
 };
@@ -47,17 +49,27 @@ export type DeleteHookContext = HookContext & {
 export type MultipartHookContext = HookContext & {
   key: string;
   bucket: string;
+  /**
+   * Declared byte size of the file — available during `init` only.
+   * Undefined during `part`, `complete`, and `abort` operations.
+   */
+  fileSize?: number;
 };
 
 export type MultipartInitSuccessContext = MultipartHookContext & {
   uploadId: string;
   contentType?: string;
+  /** Declared byte size of the file (as provided by the client). */
+  fileSize?: number;
   metadata?: Record<string, string>;
   acl?: "private" | "public-read";
 };
 
 export type MultipartCompleteSuccessContext = MultipartHookContext & {
   uploadId: string;
+  contentLength: number;
+  contentType?: string;
+  eTag?: string;
 };
 
 // ── Server hooks ────────────────────────────────────────────────────
@@ -110,6 +122,22 @@ export type S3ServerHooks = {
 export type S3HandlerConfig = {
   s3: S3Client;
   defaultBucket: string;
+  /**
+   * Maximum file size in bytes enforced server-side.
+   * - Simple uploads: enforced via `content-length-range` in the presigned POST policy (S3 rejects oversized files).
+   * - Multipart uploads: enforced at three points:
+   *   1. Init-time rejection if the client declares a `fileSize` that exceeds this limit.
+   *   2. Part-request rejection if the requested `partNumber` exceeds the maximum number of
+   *      parts derivable from this limit (caps potential over-upload to `maxFileSize + ~5 MB`).
+   *   3. HeadObject verification after CompleteMultipartUpload; the object is deleted and a 422
+   *      is returned if the actual size still exceeds this limit.
+   *
+   * Note: S3 presigned UploadPart URLs do not enforce per-part size at the S3 level.
+   * For strict enforcement, combine this setting with `requireFileSizeForMultipart`,
+   * infrastructure-level S3 lifecycle rules for incomplete multipart uploads, and
+   * rate limiting on your API endpoints.
+   */
+  maxFileSize?: number;
   hooks?: S3ServerHooks;
 };
 

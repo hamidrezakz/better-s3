@@ -1,11 +1,20 @@
 import type { UploadProgress } from "../types";
 
+/**
+ * Uploads a file directly to S3 using a presigned POST form.
+ *
+ * All policy fields (acl, Content-Type, content-length-range, signature, etc.)
+ * are embedded in `fields` and must be appended to the FormData **before** the
+ * file — this is an S3 requirement.  The size constraint is enforced by S3 at
+ * the storage layer, so the server never needs to re-validate it.
+ */
 export function uploadSimple(
   file: File,
-  presignedUrl: string,
+  url: string,
+  fields: Record<string, string>,
   onProgress?: (progress: UploadProgress) => void,
   signal?: AbortSignal,
-): Promise<string | undefined> {
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
@@ -29,8 +38,7 @@ export function uploadSimple(
       signal?.removeEventListener("abort", onAbort);
       if (xhr.status >= 200 && xhr.status < 300) {
         onProgress?.({ loaded: file.size, total: file.size, percent: 100 });
-        const eTag = xhr.getResponseHeader("ETag")?.replace(/"/g, "");
-        resolve(eTag ?? undefined);
+        resolve();
       } else {
         reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
       }
@@ -46,11 +54,14 @@ export function uploadSimple(
       reject(new DOMException("Upload aborted", "AbortError"));
     });
 
-    xhr.open("PUT", presignedUrl);
-    xhr.setRequestHeader(
-      "Content-Type",
-      file.type || "application/octet-stream",
-    );
-    xhr.send(file);
+    // S3 presigned POST: policy fields must come before the file field.
+    const formData = new FormData();
+    for (const [k, v] of Object.entries(fields)) {
+      formData.append(k, v);
+    }
+    formData.append("file", file);
+
+    xhr.open("POST", url);
+    xhr.send(formData);
   });
 }

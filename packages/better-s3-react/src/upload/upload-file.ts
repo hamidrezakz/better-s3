@@ -36,7 +36,7 @@ export async function uploadFile(
   let eTag: string | undefined;
 
   if (useMultipart) {
-    await uploadMultipart(
+    eTag = await uploadMultipart(
       api,
       file,
       objectKey,
@@ -47,25 +47,33 @@ export async function uploadFile(
       requestOptions,
     );
   } else {
-    eTag = await withRetry(
+    await withRetry(
       async () => {
         const presign = await api.upload({
           key: objectKey,
           contentType,
+          fileSize: file.size,
           metadata: requestOptions?.metadata,
           bucket: requestOptions?.bucket,
           acl: requestOptions?.acl,
         });
-        return uploadSimple(file, presign.url, callbacks.onProgress, signal);
+        await uploadSimple(
+          file,
+          presign.url,
+          presign.fields,
+          callbacks.onProgress,
+          signal,
+        );
       },
       MAX_RETRIES,
       signal,
     );
 
-    await api.confirm({
+    const confirmed = await api.confirm({
       key: objectKey,
       bucket: requestOptions?.bucket,
     });
+    eTag = confirmed.eTag;
   }
 
   return { key: objectKey, eTag };

@@ -12,6 +12,12 @@ const handler = createRouteHandler({
   defaultBucket,
   basePath: "/api/s3",
 
+  // Optional: enforce a server-side file size limit.
+  // - Simple uploads: enforced via content-length-range in the S3 presigned POST policy.
+  // - Multipart uploads: verified via HeadObject after CompleteMultipartUpload;
+  //   the object is deleted and a 422 is returned if the limit is exceeded.
+  // maxFileSize: 10 * 1024 * 1024, // 10 MB
+
   hooks: {
     // ── Global guard ──────────────────────────────────────────────
     // Runs before every request. Throw to reject (403 by default).
@@ -48,8 +54,12 @@ const handler = createRouteHandler({
       onInit: async ({ key, uploadId }) => {
         console.log(`[multipart] init: ${key} (uploadId: ${uploadId})`);
       },
-      onComplete: async ({ key, uploadId }) => {
-        console.log(`[multipart] complete: ${key} (uploadId: ${uploadId})`);
+      onComplete: async ({ key, uploadId, contentLength, contentType, eTag }) => {
+        console.log(
+          `[multipart] complete: ${key} (uploadId: ${uploadId}) — ${contentType}, ${contentLength} bytes, eTag: ${eTag}`,
+        );
+        // Example: save to your database (same as upload.onComplete)
+        // await db.file.upsert({ where: { key }, create: { ... }, update: { ... } });
       },
       onAbort: async ({ key, uploadId }) => {
         console.log(`[multipart] abort: ${key} (uploadId: ${uploadId})`);

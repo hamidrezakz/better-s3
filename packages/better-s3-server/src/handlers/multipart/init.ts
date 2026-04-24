@@ -11,6 +11,8 @@ type Payload = {
   key: string;
   bucket?: string;
   contentType?: string;
+  /** Declared total byte size of the file being uploaded. */
+  fileSize?: number;
   metadata?: Record<string, string>;
   acl?: "private" | "public-read";
 };
@@ -29,13 +31,40 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
     if (key instanceof Response) return key;
 
     const bucket = body.bucket?.trim() || config.defaultBucket;
-
     const acl = body.acl === "public-read" ? "public-read" : "private";
+    const fileSize =
+      typeof body.fileSize === "number" && body.fileSize > 0
+        ? Math.floor(body.fileSize)
+        : undefined;
+
+    // When maxFileSize is configured, fileSize must be declared so the server can
+    // enforce the limit at init time (before the multipart upload is created).
+    if (config.maxFileSize && fileSize === undefined) {
+      return Response.json(
+        { message: "fileSize is required when maxFileSize is configured" },
+        { status: 400 },
+      );
+    }
+
+    // Reject immediately if the declared size already exceeds the server limit.
+    if (
+      fileSize !== undefined &&
+      config.maxFileSize &&
+      fileSize > config.maxFileSize
+    ) {
+      return Response.json(
+        {
+          message: `File size (${fileSize} bytes) exceeds the maximum allowed size of ${config.maxFileSize} bytes`,
+        },
+        { status: 413 },
+      );
+    }
 
     const guardResult = await runHook(config.hooks?.multipart?.guard, {
       request,
       key,
       bucket,
+      fileSize,
     });
     if (guardResult) return guardResult;
 
@@ -55,6 +84,7 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
       bucket,
       uploadId: UploadId!,
       contentType: body.contentType,
+      fileSize,
       metadata: body.metadata,
       acl,
     });

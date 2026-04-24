@@ -5,6 +5,14 @@ export type PresignResponse = {
   expiresIn: number;
 };
 
+export type PresignedPostResponse = {
+  key: string;
+  bucket: string;
+  url: string;
+  fields: Record<string, string>;
+  expiresIn: number;
+};
+
 export type MultipartInitResponse = {
   key: string;
   bucket: string;
@@ -31,10 +39,16 @@ export type S3Api = {
   upload: (payload: {
     key: string;
     contentType?: string;
+    /**
+     * Exact byte size of the file. When provided the presigned POST policy
+     * locks `content-length-range` to `[fileSize, fileSize]` so S3 rejects
+     * uploads of any other size at the storage layer.
+     */
+    fileSize?: number;
     metadata?: Record<string, string>;
     bucket?: string;
     acl?: "private" | "public-read";
-  }) => Promise<PresignResponse>;
+  }) => Promise<PresignedPostResponse>;
   confirm: (payload: {
     key: string;
     bucket?: string;
@@ -51,6 +65,8 @@ export type S3Api = {
     init: (payload: {
       key: string;
       contentType?: string;
+      /** Declared total byte size of the file. Used for quota/guard checks and stored in `onInit` context. */
+      fileSize?: number;
       metadata?: Record<string, string>;
       bucket?: string;
       acl?: "private" | "public-read";
@@ -66,7 +82,14 @@ export type S3Api = {
       uploadId: string;
       parts: Array<{ partNumber: number; eTag: string }>;
       bucket?: string;
-    }) => Promise<{ key: string; bucket: string; uploadId: string }>;
+    }) => Promise<{
+      key: string;
+      bucket: string;
+      uploadId: string;
+      contentLength: number;
+      contentType?: string;
+      eTag?: string;
+    }>;
     abort: (payload: {
       key: string;
       uploadId: string;
@@ -96,7 +119,7 @@ export function createS3Api(basePath = "/api/s3"): S3Api {
 
   return {
     upload(payload) {
-      return post<PresignResponse>(`${base}/presign/upload`, payload);
+      return post<PresignedPostResponse>(`${base}/presign/upload`, payload);
     },
 
     confirm(payload) {
@@ -141,10 +164,14 @@ export function createS3Api(basePath = "/api/s3"): S3Api {
       },
 
       complete(payload) {
-        return post<{ key: string; bucket: string; uploadId: string }>(
-          `${base}/presign/multipart/complete`,
-          payload,
-        );
+        return post<{
+          key: string;
+          bucket: string;
+          uploadId: string;
+          contentLength: number;
+          contentType?: string;
+          eTag?: string;
+        }>(`${base}/presign/multipart/complete`, payload);
       },
 
       abort(payload) {

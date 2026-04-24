@@ -22,8 +22,10 @@ export {
   type S3Api,
   type S3Api as PresignApi,
   type PresignResponse,
+  type PresignedPostResponse,
   type MultipartInitResponse,
   type MultipartPartResponse,
+  type UploadConfirmResponse,
 } from "@better-s3/server";
 
 // Hooks
@@ -44,11 +46,6 @@ export {
   type UseUploadControlsOptions,
   type UseUploadControlsReturn,
 } from "./use-upload-controls";
-export {
-  useMultiUploadControls,
-  type UseMultiUploadControlsOptions,
-  type UseMultiUploadControlsReturn,
-} from "./use-multi-upload-controls";
 export {
   useDownload,
   type DownloadPhase,
