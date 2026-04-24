@@ -11,17 +11,17 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.0",
+    "@base-ui/react": "^1.4.1",
     "@better-s3/react": "workspace:*",
     "@better-s3/server": "workspace:*",
     "@better-s3/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "fumadocs-core": "16.8.0",
+    "fumadocs-core": "16.8.3",
     "fumadocs-mdx": "14.3.1",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@latest",
-    "lucide-react": "^1.8.0",
-    "next": "16.2.3",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@^16.8.3",
+    "lucide-react": "^1.11.0",
+    "next": "16.2.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "shadcn": "^4.4.0",
@@ -30,15 +30,15 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^10.2.0",
-    "eslint-config-next": "16.2.3",
-    "postcss": "^8.5.9",
-    "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "eslint": "^10.2.1",
+    "eslint-config-next": "16.2.4",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3"
   }
 }

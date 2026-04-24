@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1032.0",
+    "@aws-sdk/client-s3": "^3.1036.0",
     "@base-ui/react": "^1.4.1",
     "@better-s3/server": "workspace:*",
     "@uppy/aws-s3": "^5.1.0",
@@ -19,7 +19,7 @@
     "@uppy/status-bar": "^5.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.9.0",
+    "lucide-react": "^1.11.0",
     "next": "16.2.4",
     "next-themes": "^0.4.6",
     "react": "19.2.5",
