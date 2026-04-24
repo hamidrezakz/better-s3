@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { S3Api } from "@better-s3/server";
+import { parseContentDispositionFilename } from "./helpers";
 
 export type FetchDownloadPhase =
   | "idle"
@@ -68,7 +69,7 @@ export function useFetchDownload(
   const abortRef = useRef<AbortController | null>(null);
 
   const download = useCallback(async (key: string, downloadName?: string) => {
-    const name = downloadName ?? key.split("/").pop() ?? key;
+    const fallback = key.split("/").pop() ?? key;
     const opts = optionsRef.current;
 
     if (opts.beforeDownload) {
@@ -88,13 +89,13 @@ export function useFetchDownload(
       phase: "presigning",
       progress: INITIAL_PROGRESS,
       error: null,
-      fileName: name,
+      fileName: downloadName ?? null,
       fileSize: null,
     });
 
     try {
       const { url } = await opts.api.download(key, {
-        fileName: name,
+        fileName: downloadName,
         bucket: opts.bucket,
       });
 
@@ -114,7 +115,17 @@ export function useFetchDownload(
       }
 
       const contentLength = Number(res.headers.get("content-length") || 0);
-      setState((s) => ({ ...s, fileSize: contentLength || null }));
+      const name =
+        downloadName ??
+        parseContentDispositionFilename(
+          res.headers.get("content-disposition"),
+          fallback,
+        );
+      setState((s) => ({
+        ...s,
+        fileName: name,
+        fileSize: contentLength || null,
+      }));
 
       const reader = res.body?.getReader();
       if (!reader) throw new Error("ReadableStream not supported");
@@ -142,7 +153,7 @@ export function useFetchDownload(
       const blobUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = blobUrl;
-      anchor.download = name;
+      anchor.download = name ?? fallback;
       anchor.click();
       URL.revokeObjectURL(blobUrl);
 

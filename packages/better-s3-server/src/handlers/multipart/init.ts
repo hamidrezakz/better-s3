@@ -3,6 +3,7 @@ import type { S3HandlerConfig } from "../../types";
 import {
   parseBody,
   requireString,
+  buildContentDisposition,
   runHook,
   withS3ErrorHandler,
 } from "../../helpers";
@@ -15,6 +16,8 @@ type Payload = {
   fileSize?: number;
   metadata?: Record<string, string>;
   acl?: "private" | "public-read";
+  /** Original file name. Stored as `Content-Disposition: attachment; filename="..."` on the S3 object. */
+  fileName?: string;
 };
 
 export function createMultipartInitHandler(config: S3HandlerConfig) {
@@ -37,7 +40,6 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
         ? Math.floor(body.fileSize)
         : undefined;
 
-    // When maxFileSize is configured, fileSize must be declared so the server can
     // enforce the limit at init time (before the multipart upload is created).
     if (config.maxFileSize && fileSize === undefined) {
       return Response.json(
@@ -73,6 +75,9 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
         Bucket: bucket,
         Key: key,
         ContentType: body.contentType,
+        ContentDisposition: body.fileName
+          ? buildContentDisposition(body.fileName)
+          : undefined,
         Metadata: body.metadata,
         ACL: acl,
       }),

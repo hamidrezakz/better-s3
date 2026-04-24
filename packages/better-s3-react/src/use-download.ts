@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { S3Api } from "@better-s3/server";
+import { parseContentDispositionFilename } from "./helpers";
 
 export type DownloadPhase = "idle" | "downloading" | "success" | "error";
 
@@ -40,7 +41,7 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
   optionsRef.current = options;
 
   const download = useCallback(async (key: string, downloadName?: string) => {
-    const name = downloadName ?? key.split("/").pop() ?? key;
+    const fallback = key.split("/").pop() ?? key;
     const opts = optionsRef.current;
 
     if (opts.beforeDownload) {
@@ -49,18 +50,22 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
         setState({
           phase: "error",
           error: "Download blocked by beforeDownload hook",
-          fileName: name,
+          fileName: downloadName ?? null,
         });
         opts.onError?.(key, new Error("blocked"));
         return;
       }
     }
 
-    setState({ phase: "downloading", error: null, fileName: name });
+    setState({
+      phase: "downloading",
+      error: null,
+      fileName: downloadName ?? null,
+    });
 
     try {
       const { url } = await opts.api.download(key, {
-        fileName: name,
+        fileName: downloadName,
         bucket: opts.bucket,
       });
 
@@ -75,6 +80,13 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
         );
       }
 
+      const name =
+        downloadName ??
+        parseContentDispositionFilename(
+          res.headers.get("content-disposition"),
+          fallback,
+        );
+
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
@@ -88,7 +100,11 @@ export function useDownload(options: UseDownloadOptions): UseDownloadReturn {
       setState(INITIAL_STATE);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Download failed";
-      setState({ phase: "error", error: message, fileName: name });
+      setState({
+        phase: "error",
+        error: message,
+        fileName: downloadName ?? null,
+      });
       opts.onError?.(key, err);
     }
   }, []);

@@ -1,3 +1,18 @@
+/**
+ * Builds a RFC 6266 `Content-Disposition` value for a file attachment.
+ * Includes both the ASCII-safe `filename` fallback and the RFC 5987
+ * `filename*` parameter for full Unicode support.
+ *
+ * @example
+ * buildContentDisposition("résumé finale.pdf")
+ * // → 'attachment; filename="resume finale.pdf"; filename*=UTF-8\'\'r%C3%A9sum%C3%A9%20finale.pdf'
+ */
+export function buildContentDisposition(fileName: string): string {
+  const ascii = fileName.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "_");
+  const encoded = encodeURIComponent(fileName);
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encoded}`;
+}
+
 export async function parseBody<T extends Record<string, unknown>>(
   request: Request,
 ): Promise<T | null> {

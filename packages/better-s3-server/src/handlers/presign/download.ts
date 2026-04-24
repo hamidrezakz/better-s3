@@ -31,7 +31,9 @@ export function createDownloadHandler(config: S3HandlerConfig) {
       new GetObjectCommand({
         Bucket: bucket,
         Key: key,
-        ResponseContentDisposition: `attachment${fileName ? `; filename="${fileName}"` : ""}`,
+        ...(fileName
+          ? { ResponseContentDisposition: `attachment; filename="${fileName}"` }
+          : {}),
       }),
       { expiresIn },
     );

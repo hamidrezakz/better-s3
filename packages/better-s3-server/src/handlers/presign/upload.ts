@@ -4,6 +4,7 @@ import {
   parseBody,
   requireString,
   normalizeExpiresIn,
+  buildContentDisposition,
   runHook,
   withS3ErrorHandler,
 } from "../../helpers";
@@ -26,6 +27,8 @@ type Payload = {
   bucket?: string;
   expiresIn?: number;
   acl?: "private" | "public-read";
+  /** Original file name. Stored as `Content-Disposition: attachment; filename="..."` on the S3 object. */
+  fileName?: string;
 };
 
 export function createUploadHandler(config: S3HandlerConfig) {
@@ -79,6 +82,10 @@ export function createUploadHandler(config: S3HandlerConfig) {
     // Build presigned POST fields. Fields are embedded in the signed policy
     // so the client cannot change them without invalidating the signature.
     const fields: Record<string, string> = { acl, "Content-Type": contentType };
+
+    if (body.fileName) {
+      fields["Content-Disposition"] = buildContentDisposition(body.fileName);
+    }
 
     if (body.metadata) {
       for (const [k, v] of Object.entries(body.metadata)) {

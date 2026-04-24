@@ -53,6 +53,10 @@ export async function uploadFile(
           key: objectKey,
           contentType,
           fileSize: file.size,
+          fileName:
+            requestOptions?.fileName !== null
+              ? (requestOptions?.fileName ?? file.name)
+              : undefined,
           metadata: requestOptions?.metadata,
           bucket: requestOptions?.bucket,
           acl: requestOptions?.acl,

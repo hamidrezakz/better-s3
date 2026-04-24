@@ -28,6 +28,12 @@ export type UploadRequestOptions = {
   contentType?: string;
   /** Object ACL – defaults to `'private'` */
   acl?: "private" | "public-read";
+  /**
+   * Original file name stored as `Content-Disposition` on the S3 object.
+   * Defaults to the browser's `file.name` when not provided.
+   * Pass `null` to omit Content-Disposition entirely.
+   */
+  fileName?: string | null;
 };
 
 export type UploadHooks = {

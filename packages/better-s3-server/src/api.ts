@@ -48,6 +48,8 @@ export type S3Api = {
     metadata?: Record<string, string>;
     bucket?: string;
     acl?: "private" | "public-read";
+    /** Original file name. Stored as `Content-Disposition` on the S3 object. */
+    fileName?: string;
   }) => Promise<PresignedPostResponse>;
   confirm: (payload: {
     key: string;
@@ -70,6 +72,8 @@ export type S3Api = {
       metadata?: Record<string, string>;
       bucket?: string;
       acl?: "private" | "public-read";
+      /** Original file name. Stored as `Content-Disposition` on the S3 object. */
+      fileName?: string;
     }) => Promise<MultipartInitResponse>;
     signPart: (payload: {
       key: string;
