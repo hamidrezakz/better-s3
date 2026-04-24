@@ -1,6 +1,6 @@
 {
   "name": "@better-s3/server",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Framework-agnostic S3 server handlers — presigned uploads, downloads, deletes, and multipart operations",
   "keywords": [
     "s3",
