@@ -64,7 +64,7 @@ export function UploadStatus({
     return (
       <div className="flex min-w-0 items-start gap-1.5 text-xs">
         <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
-        <p className="min-w-0 break-words text-destructive">
+        <p className="min-w-0 [overflow-wrap:anywhere] text-destructive">
           {fileInfo && (
             <>
               <span className="inline-block max-w-[20ch] truncate align-bottom">

@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { formatFileSize } from "@better-s3/react";
+
+const truncateMsg = (msg: string, max = 100) =>
+  msg.length > max ? msg.slice(0, max) + "…" : msg;
 import type { UseUploadControlsReturn } from "@better-s3/react";
 
 /**
@@ -60,7 +63,7 @@ export function useUploadToast(
           });
         } else {
           toast.error("Upload failed", {
-            description: ctrl.error ?? "Unknown error",
+            description: truncateMsg(ctrl.error ?? "Unknown error"),
           });
         }
         toastIdRef.current = null;

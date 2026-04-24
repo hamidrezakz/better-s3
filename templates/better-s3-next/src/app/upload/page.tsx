@@ -64,14 +64,14 @@ export default function UploadPage() {
         <div className="flex flex-wrap gap-3">
           <DownloadButton
             api={api}
-            objectKey="multi/1775874047348-askarzadeh.logo-27.jpg"
+            objectKey="documents/ch2-6.pdf"
           />
           <ProgressDownloadButton
             api={api}
-            objectKey="multi/1775874047348-askarzadeh.logo-27.jpg"
+            objectKey="documents/ch2-6.pdf"
             label="Download (with progress)"
           />
-          <DeleteButton api={api} objectKey="multi/1775874047348-askarzadeh.logo-27.jpg" />
+          <DeleteButton api={api} objectKey="documejjjjjjjjjjjjjjjj/jjjjjjjjjjjjjjjjjjjjjjj/jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj/jjjjjjjjjjjjjjjjjjjjjjjjjjjjjj/jjjjjjjjjjjjjjjjj/jjjjjjjjjjjjjjjjjjjjjjj/jjjjjjjjjjjjjj/jjjjjjjjjnts/ch2-6.pdf" />
         </div>
       </section>
     </main>

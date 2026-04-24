@@ -25,10 +25,7 @@ export function createDeleteHandler(config: S3HandlerConfig) {
     try {
       await config.s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
     } catch {
-      return Response.json(
-        { message: `Object "${key}" not found` },
-        { status: 404 },
-      );
+      return Response.json({ message: "Object not found" }, { status: 404 });
     }
 
     await config.s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));

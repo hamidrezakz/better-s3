@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
 import { formatFileSize } from "@better-s3/react";
 import type { S3Api, DeleteHooks } from "@better-s3/react";
 import { useDelete } from "@better-s3/react";
+
+const truncateMsg = (msg: string, max = 100) =>
+  msg.length > max ? msg.slice(0, max) + "…" : msg;
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -85,7 +88,9 @@ export function DeleteButton({
     onError: (key, error, phase) => {
       if (enableToast) {
         toast.error("Delete failed", {
-          description: error instanceof Error ? error.message : "Unknown error",
+          description: truncateMsg(
+            error instanceof Error ? error.message : "Unknown error",
+          ),
         });
       }
       onError?.(key, error, phase);
@@ -160,7 +165,7 @@ export function DeleteButton({
       {showStatus && del.phase === "success" && (
         <div className="flex min-w-0 items-center gap-1.5 text-xs">
           <CheckCircle2Icon className="size-3.5 shrink-0 text-green-600" />
-          <p className="min-w-0 break-words text-green-600">
+          <p className="min-w-0 [overflow-wrap:anywhere] text-green-600">
             &ldquo;
             <span className="inline-block max-w-[14ch] truncate align-bottom">
               {displayName}
@@ -173,7 +178,7 @@ export function DeleteButton({
       {showStatus && del.phase === "error" && (
         <div className="flex min-w-0 items-start gap-1.5 text-xs">
           <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
-          <p className="min-w-0 break-words text-destructive">
+          <p className="min-w-0 [overflow-wrap:anywhere] text-destructive">
             {del.error ?? "Delete failed"}
           </p>
         </div>

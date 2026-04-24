@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 import { formatFileSize } from "@better-s3/react";
 import type { S3Api, FetchDownloadHooks } from "@better-s3/react";
 import { useFetchDownload } from "@better-s3/react";
+
+const truncateMsg = (msg: string, max = 100) =>
+  msg.length > max ? msg.slice(0, max) + "…" : msg;
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -73,7 +76,9 @@ export function ProgressDownloadButton({
       if (enableToast) {
         toast.dismiss(`dl-${objectKey}`);
         toast.error("Download failed", {
-          description: error instanceof Error ? error.message : "Unknown error",
+          description: truncateMsg(
+            error instanceof Error ? error.message : "Unknown error",
+          ),
         });
       }
       onError?.(key, error, phase);
@@ -136,7 +141,7 @@ export function ProgressDownloadButton({
       {showStatus && dl.phase === "error" && (
         <div className="flex min-w-0 items-start gap-1.5 text-xs">
           <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
-          <p className="min-w-0 break-words text-destructive">
+          <p className="min-w-0 [overflow-wrap:anywhere] text-destructive">
             {dl.error ?? "Download failed"}
           </p>
         </div>
