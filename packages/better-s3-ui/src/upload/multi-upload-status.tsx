@@ -103,7 +103,7 @@ function FileList({ files }: { files: MultiUploadFileState[] }) {
                 strokeWidth={2}
               />
             )}
-            <span className="max-w-32 min-w-16 truncate sm:max-w-48">
+            <span className="[overflow-wrap:anywhere] max-w-32 min-w-16 truncate sm:max-w-48">
               {f.fileName}
             </span>
             {f.status === "uploading" ? (
@@ -118,7 +118,7 @@ function FileList({ files }: { files: MultiUploadFileState[] }) {
             )}
           </div>
           {f.status === "error" && f.error && (
-            <span className="truncate pl-5 text-destructive">{f.error}</span>
+            <span className="truncate [overflow-wrap:anywhere] pl-5 text-destructive">{f.error}</span>
           )}
         </li>
       ))}
