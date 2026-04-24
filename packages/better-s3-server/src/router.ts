@@ -2,9 +2,12 @@ import type { S3RouteHandlerConfig } from "./types";
 import { createHandlers } from "./create-handlers";
 import { runHook } from "./helpers";
 
+const disabled = () => Response.json({ message: "Not Found" }, { status: 404 });
+
 export function createRouter(config: S3RouteHandlerConfig) {
   const handlers = createHandlers(config);
   const base = config.basePath.replace(/\/$/, "");
+  const { features } = config;
 
   return async (request: Request): Promise<Response> => {
     // Global guard — runs before every request
@@ -16,21 +19,27 @@ export function createRouter(config: S3RouteHandlerConfig) {
     const method = request.method;
 
     if (method === "POST" && subpath === "presign/upload")
-      return handlers.presign.upload(request);
+      return features.upload ? handlers.presign.upload(request) : disabled();
     if (method === "POST" && subpath === "presign/upload/confirm")
-      return handlers.presign.confirm(request);
+      return features.upload ? handlers.presign.confirm(request) : disabled();
     if (method === "GET" && subpath === "presign/download")
-      return handlers.presign.download(request);
+      return features.download
+        ? handlers.presign.download(request)
+        : disabled();
     if (method === "DELETE" && subpath === "delete")
-      return handlers.delete(request);
+      return features.delete ? handlers.delete(request) : disabled();
     if (method === "POST" && subpath === "presign/multipart/init")
-      return handlers.multipart.init(request);
+      return features.multipart ? handlers.multipart.init(request) : disabled();
     if (method === "POST" && subpath === "presign/multipart/part")
-      return handlers.multipart.part(request);
+      return features.multipart ? handlers.multipart.part(request) : disabled();
     if (method === "POST" && subpath === "presign/multipart/complete")
-      return handlers.multipart.complete(request);
+      return features.multipart
+        ? handlers.multipart.complete(request)
+        : disabled();
     if (method === "POST" && subpath === "presign/multipart/abort")
-      return handlers.multipart.abort(request);
+      return features.multipart
+        ? handlers.multipart.abort(request)
+        : disabled();
 
     return Response.json({ message: "Not Found" }, { status: 404 });
   };

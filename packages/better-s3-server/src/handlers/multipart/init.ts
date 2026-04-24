@@ -40,15 +40,6 @@ export function createMultipartInitHandler(config: S3HandlerConfig) {
         ? Math.floor(body.fileSize)
         : undefined;
 
-    // enforce the limit at init time (before the multipart upload is created).
-    if (config.maxFileSize && fileSize === undefined) {
-      return Response.json(
-        { message: "fileSize is required when maxFileSize is configured" },
-        { status: 400 },
-      );
-    }
-
-    // Reject immediately if the declared size already exceeds the server limit.
     if (
       fileSize !== undefined &&
       config.maxFileSize &&

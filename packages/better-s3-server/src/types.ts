@@ -75,42 +75,81 @@ export type MultipartCompleteSuccessContext = MultipartHookContext & {
 // ── Server hooks ────────────────────────────────────────────────────
 
 export type S3ServerHooks = {
-  /** Runs before every request. Throw to reject. */
+  /**
+   * Runs before every request. Throw to reject (`403` by default).
+   */
   guard?: (context: HookContext) => Promise<void> | void;
 
   upload?: {
-    /** Runs before presigning an upload URL. Throw to reject. */
+    /**
+     * Runs before the presigned URL is generated.
+     * `fileSize` is client-declared — treat as untrusted.
+     * Throw to reject (`403` by default).
+     */
     guard?: (context: UploadHookContext) => Promise<void> | void;
-    /** Runs after a presigned upload URL is generated. */
-    onSuccess?: (context: UploadSuccessContext) => Promise<void> | void;
-    /** Runs after a simple upload is confirmed via HeadObject. */
-    onComplete?: (context: UploadCompleteContext) => Promise<void> | void;
+
+    /**
+     * Fires after the presigned URL is issued. The file has not been uploaded yet.
+     */
+    onPresigned?: (context: UploadSuccessContext) => Promise<void> | void;
+
+    /**
+     * Fires after `POST /presign/upload/confirm`. The server verifies the object via
+     * `HeadObject`, so `contentLength` and `eTag` are the actual S3 values.
+     */
+    onUploaded?: (context: UploadCompleteContext) => Promise<void> | void;
   };
 
   download?: {
-    /** Runs before presigning a download URL. Throw to reject. */
+    /**
+     * Runs before the presigned download URL is generated.
+     * Throw to reject (`403` by default).
+     */
     guard?: (context: DownloadHookContext) => Promise<void> | void;
-    /** Runs after a presigned download URL is generated. */
-    onSuccess?: (context: DownloadSuccessContext) => Promise<void> | void;
+
+    /**
+     * Fires after the presigned download URL is issued. The file has not been downloaded yet.
+     */
+    onPresigned?: (context: DownloadSuccessContext) => Promise<void> | void;
   };
 
   delete?: {
-    /** Runs before deleting an object. Throw to reject. */
+    /**
+     * Runs before the object is deleted from S3.
+     * Throw to reject (`403` by default).
+     */
     guard?: (context: DeleteHookContext) => Promise<void> | void;
-    /** Runs after an object is deleted. */
-    onSuccess?: (context: DeleteHookContext) => Promise<void> | void;
+
+    /**
+     * Fires after the object is successfully deleted from S3.
+     */
+    onDeleted?: (context: DeleteHookContext) => Promise<void> | void;
   };
 
   multipart?: {
-    /** Runs before any multipart operation. Throw to reject. */
+    /**
+     * Runs before every multipart operation (`init`, `part`, `complete`, `abort`).
+     * `fileSize` is only present during `init`.
+     * Throw to reject (`403` by default).
+     */
     guard?: (context: MultipartHookContext) => Promise<void> | void;
-    /** Runs after a multipart upload is initialized. */
+
+    /**
+     * Fires after `CreateMultipartUpload`. Use to record the pending session in your database.
+     */
     onInit?: (context: MultipartInitSuccessContext) => Promise<void> | void;
-    /** Runs after a multipart upload is completed (file fully uploaded). */
+
+    /**
+     * Fires after `CompleteMultipartUpload`. The server runs `HeadObject` first,
+     * so `contentLength` and `eTag` are the actual S3 values.
+     */
     onComplete?: (
       context: MultipartCompleteSuccessContext,
     ) => Promise<void> | void;
-    /** Runs after a multipart upload is aborted. */
+
+    /**
+     * Fires after `AbortMultipartUpload`. S3 releases all stored parts on success.
+     */
     onAbort?: (
       context: MultipartHookContext & { uploadId: string },
     ) => Promise<void> | void;
@@ -119,25 +158,54 @@ export type S3ServerHooks = {
 
 // ── Config types ────────────────────────────────────────────────────
 
+export type S3Features = {
+  /**
+   * Enable presigned upload endpoints (`POST /presign/upload` and
+   * `POST /presign/upload/confirm`).
+   * @default false
+   */
+  upload?: boolean;
+  /**
+   * Enable the presigned download endpoint (`GET /presign/download`).
+   * @default false
+   */
+  download?: boolean;
+  /**
+   * Enable the delete endpoint (`DELETE /delete`).
+   * @default false
+   */
+  delete?: boolean;
+  /**
+   * Enable all multipart upload endpoints (`/presign/multipart/*`).
+   * Keep disabled unless you explicitly need multipart support — see the
+   * multipart cost-attack section in the README.
+   * @default false
+   */
+  multipart?: boolean;
+};
+
 export type S3HandlerConfig = {
+  /** The S3 client instance used to communicate with your bucket. */
   s3: S3Client;
+  /** Default bucket used when no `bucket` is specified in the request payload. */
   defaultBucket: string;
   /**
-   * Maximum file size in bytes enforced server-side.
-   * - Simple uploads: enforced via `content-length-range` in the presigned POST policy (S3 rejects oversized files).
-   * - Multipart uploads: enforced at three points:
-   *   1. Init-time rejection if the client declares a `fileSize` that exceeds this limit.
-   *   2. Part-request rejection if the requested `partNumber` exceeds the maximum number of
-   *      parts derivable from this limit (caps potential over-upload to `maxFileSize + ~5 MB`).
-   *   3. HeadObject verification after CompleteMultipartUpload; the object is deleted and a 422
-   *      is returned if the actual size still exceeds this limit.
+   * Controls which API endpoints are active.
+   * **All features are disabled by default** — you must opt in to each one.
    *
-   * Note: S3 presigned UploadPart URLs do not enforce per-part size at the S3 level.
-   * For strict enforcement, combine this setting with `requireFileSizeForMultipart`,
-   * infrastructure-level S3 lifecycle rules for incomplete multipart uploads, and
-   * rate limiting on your API endpoints.
+   * ```ts
+   * features: { upload: true, download: true, delete: true }
+   * // multipart stays off unless you explicitly enable it
+   * ```
+   */
+  features: S3Features;
+  /**
+   * Maximum file size in bytes. If set and the client declares a `fileSize` that
+   * exceeds this value, the request is rejected before any presigned URL is
+   * generated. Applies to both simple upload and multipart init.
    */
   maxFileSize?: number;
+  /** Optional lifecycle hooks for authentication, logging, and side effects. */
   hooks?: S3ServerHooks;
 };
 

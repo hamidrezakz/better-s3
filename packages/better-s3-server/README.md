@@ -19,7 +19,14 @@ const handler = createRouteHandler({
   s3: new S3Client({ region: "us-east-1" }),
   defaultBucket: "my-bucket",
   basePath: "/api/s3",
-  maxFileSize: 100 * 1024 * 1024, // (100 MB) global server limit for all uploads
+
+  // Enable only the features your app needs. All are disabled by default.
+  features: {
+    upload: true,
+    download: true,
+    delete: true,
+    // multipart: true, // enable only if you explicitly need multipart support
+  },
 });
 
 export { handler as GET, handler as POST, handler as DELETE };
@@ -32,16 +39,96 @@ const router = createRouter({
   s3,
   defaultBucket: "my-bucket",
   basePath: "/api/s3",
+  features: { upload: true, download: true, delete: true, multipart: true },
+  hooks: {
+    guard: async ({ request }) => {
+      console.log("[guard]", request.method, request.url);
+    },
+
+    upload: {
+      guard: async ({ key, bucket, contentType, fileSize }) => {
+        console.log("[upload.guard]", { key, bucket, contentType, fileSize });
+      },
+      onPresigned: async ({ key, url, expiresIn }) => {
+        console.log("[upload.onPresigned]", { key, url, expiresIn });
+      },
+      onUploaded: async ({ key, contentType, contentLength, eTag }) => {
+        console.log("[upload.onUploaded]", {
+          key,
+          contentType,
+          contentLength,
+          eTag,
+        });
+      },
+    },
+
+    download: {
+      guard: async ({ key, bucket, fileName }) => {
+        console.log("[download.guard]", { key, bucket, fileName });
+      },
+      onPresigned: async ({ key, url, expiresIn }) => {
+        console.log("[download.onPresigned]", { key, url, expiresIn });
+      },
+    },
+
+    delete: {
+      guard: async ({ key, bucket }) => {
+        console.log("[delete.guard]", { key, bucket });
+      },
+      onDeleted: async ({ key, bucket }) => {
+        console.log("[delete.onDeleted]", { key, bucket });
+      },
+    },
+
+    multipart: {
+      guard: async ({ key, bucket, fileSize }) => {
+        console.log("[multipart.guard]", { key, bucket, fileSize });
+      },
+      onInit: async ({ key, uploadId, contentType, fileSize }) => {
+        console.log("[multipart.onInit]", {
+          key,
+          uploadId,
+          contentType,
+          fileSize,
+        });
+      },
+      onComplete: async ({ key, uploadId, contentLength, eTag }) => {
+        console.log("[multipart.onComplete]", {
+          key,
+          uploadId,
+          contentLength,
+          eTag,
+        });
+      },
+      onAbort: async ({ key, uploadId }) => {
+        console.log("[multipart.onAbort]", { key, uploadId });
+      },
+    },
+  },
 });
 
 app.all("/api/s3/*", (c) => router(c.req.raw)); // Hono example
 ```
 
+## Features
 
-| Upload mode | Enforcement                                                                                                                                                       |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Simple      | S3 enforces exact size via `content-length-range` in the signed POST policy — tamperproof                                                                         |
-| Multipart   | 1. Init rejected if `fileSize` exceeds limit · 2. Part requests capped at `ceil(maxFileSize / 5 MiB)` · 3. `HeadObject` after complete → delete + 422 if exceeded |
+All endpoints are **disabled by default**. You must explicitly opt in via the `features` config — this prevents unintended exposure of expensive or sensitive operations (especially multipart, which is vulnerable to [cost attacks](#multipart-cost-attacks)).
+
+```ts
+features: {
+  upload: true,     // POST /presign/upload + POST /presign/upload/confirm
+  download: true,   // GET  /presign/download
+  delete: true,     // DELETE /delete
+  multipart: true,  // POST /presign/multipart/{init,part,complete,abort}
+}
+```
+
+> Disabled endpoints respond with `404 Not Found`.
+
+| Upload mode | Enforcement                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------- |
+| Simple      | S3 enforces exact size via `content-length-range` in the signed POST policy — tamperproof                       |
+| Multipart   | `HeadObject` after complete verifies the final object size; no per-part enforcement at the S3 level (see below) |
 
 > Simple upload is inherently more secure — enforcement happens at the S3 storage layer. Multipart presigned `UploadPart` URLs cannot enforce per-part size; see [Multipart cost attacks](#multipart-cost-attacks).
 
@@ -50,7 +137,7 @@ app.all("/api/s3/*", (c) => router(c.req.raw)); // Hono example
 Run server-side logic at key points. Every hook receives the `Request` object. **Throw to reject** — returned as `{ message }` with status 403, or any status you set on the thrown error.
 
 ```
-Simple:    upload.guard → upload.onSuccess → [S3] → upload.onComplete
+Simple:    upload.guard → upload.onPresigned → [S3] → upload.onUploaded
 Multipart: multipart.guard(init) → multipart.onInit
            multipart.guard(part) → [S3]
            multipart.guard(complete) → HeadObject → multipart.onComplete
@@ -70,7 +157,7 @@ hooks: {
 
 ### Quota check
 
-`fileSize` in `upload.guard` and `multipart.guard` (init only) is **declared by the client** — use it for pre-checks. `contentLength` in `onComplete` is verified by S3.
+`fileSize` in `upload.guard` and `multipart.guard` (init only) is **declared by the client** — use it for pre-checks. `contentLength` in `onUploaded` / `multipart.onComplete` is verified by S3.
 
 ```ts
 hooks: {

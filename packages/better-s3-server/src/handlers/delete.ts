@@ -33,7 +33,7 @@ export function createDeleteHandler(config: S3HandlerConfig) {
 
     await config.s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 
-    await config.hooks?.delete?.onSuccess?.({ request, key, bucket });
+    await config.hooks?.delete?.onDeleted?.({ request, key, bucket });
 
     return Response.json({ success: true, bucket, key });
   });

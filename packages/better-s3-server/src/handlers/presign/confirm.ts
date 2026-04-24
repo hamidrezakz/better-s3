@@ -48,7 +48,7 @@ export function createConfirmHandler(config: S3HandlerConfig) {
       metadata: head.Metadata,
     };
 
-    await config.hooks?.upload?.onComplete?.(context);
+    await config.hooks?.upload?.onUploaded?.(context);
 
     return Response.json({
       key,

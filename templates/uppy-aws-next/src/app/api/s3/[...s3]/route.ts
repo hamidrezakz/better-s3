@@ -22,6 +22,14 @@ const handler = createRouteHandler({
   defaultBucket,
   basePath: "/api/s3",
 
+  // Enable only the features your app needs. All are disabled by default.
+  features: {
+    upload: true,
+    download: true,
+    delete: true,
+    multipart: true, // required by Uppy's multipart upload strategy
+  },
+
   hooks: {
     // ── Global guard ──────────────────────────────────────────────
     // Uncomment to protect all routes (e.g. session check, API key, etc.)
@@ -31,10 +39,10 @@ const handler = createRouteHandler({
     // },
 
     upload: {
-      onSuccess: async ({ key, bucket, contentType }) => {
+      onPresigned: async ({ key, bucket, contentType }) => {
         console.log(`[upload] presigned: ${key} (${contentType}) in ${bucket}`);
       },
-      onComplete: async ({ key, contentType, contentLength, eTag }) => {
+      onUploaded: async ({ key, contentType, contentLength, eTag }) => {
         console.log(
           `[upload] confirmed: ${key} — ${contentType}, ${contentLength} bytes, eTag: ${eTag}`,
         );
@@ -43,7 +51,7 @@ const handler = createRouteHandler({
     },
 
     delete: {
-      onSuccess: async ({ key, bucket }) => {
+      onDeleted: async ({ key, bucket }) => {
         console.log(`[delete] ${key} from ${bucket}`);
         // TODO: remove record from your database here
       },

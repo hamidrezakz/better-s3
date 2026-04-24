@@ -9,7 +9,7 @@ import {
   withS3ErrorHandler,
 } from "../../helpers";
 
-// 5 GiB — S3 single-object size limit
+// 5 GiB — S3 single-object upload limit
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024 * 1024;
 
 type Payload = {
@@ -53,8 +53,6 @@ export function createUploadHandler(config: S3HandlerConfig) {
         ? Math.floor(body.fileSize)
         : null;
 
-    // Reject immediately if the declared size already exceeds the server limit,
-    // before generating any presigned URL.
     if (
       fileSize !== null &&
       config.maxFileSize &&
@@ -99,9 +97,8 @@ export function createUploadHandler(config: S3HandlerConfig) {
     // When the client declares fileSize: S3 locks the range to exactly that
     // number of bytes, so uploading a different-sized file is impossible.
     // When fileSize is not declared: falls back to [1, maxFileSize ?? 5 GiB].
-    const maxBytes = config.maxFileSize ?? MAX_UPLOAD_SIZE;
     const rangeMin = fileSize ?? 1;
-    const rangeMax = fileSize ?? maxBytes;
+    const rangeMax = fileSize ?? config.maxFileSize ?? MAX_UPLOAD_SIZE;
 
     const { url, fields: signedFields } = await createPresignedPost(config.s3, {
       Bucket: bucket,
@@ -111,7 +108,7 @@ export function createUploadHandler(config: S3HandlerConfig) {
       Expires: expiresIn,
     });
 
-    await config.hooks?.upload?.onSuccess?.({
+    await config.hooks?.upload?.onPresigned?.({
       request,
       key,
       bucket,

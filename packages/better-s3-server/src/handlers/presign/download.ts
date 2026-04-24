@@ -38,7 +38,7 @@ export function createDownloadHandler(config: S3HandlerConfig) {
       { expiresIn },
     );
 
-    await config.hooks?.download?.onSuccess?.({
+    await config.hooks?.download?.onPresigned?.({
       request,
       key,
       bucket,
